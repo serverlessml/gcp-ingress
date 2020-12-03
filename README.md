@@ -13,8 +13,10 @@ The ingress service to invoke ML pipeline. A web-server with two end-points:
 ```js
 {
     "id": UUID4,
-    "model_config": Object,
-    "data_config": Object,
+    "config": {
+        "model": Object,
+        "data": Object,
+    }
 }
 ```
 
