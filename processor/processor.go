@@ -92,3 +92,8 @@ func (p *Processor) Exec(data []byte) (*Output, error) {
 func (p *Processor) Marshal(obj *Output) ([]byte, error) {
 	return json.Marshal(obj)
 }
+
+// MarshalPayload marshal the output payload object.
+func (p *Processor) MarshalPayload(obj *Output) ([]byte, error) {
+	return json.Marshal(obj.Payload)
+}

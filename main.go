@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/serverlessml/gcp-ingress/bus"
 	"github.com/serverlessml/gcp-ingress/processor"
 )
 
@@ -47,28 +48,43 @@ func handlerPOST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	payload, err := GetPayload(r.Body)
+	inputPayload, err := GetPayload(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	output, err := proc.Exec(payload)
+	output, err := proc.Exec(inputPayload)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	out, _ := proc.Marshal(output)
+	outputPayload, _ := proc.MarshalPayload(output)
+
+	err = pubsubClient.Push(outputPayload, output.Distribution.Topic)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
-	w.Write(out)
 	return
 }
 
-var proc processor.Processor
+var (
+	proc         processor.Processor
+	pubsubClient bus.Client
+)
 
 func main() {
-	proc.TopicPrefix = GetEnv("TOPIC_PREFIX", "trigger-")
+	proc.TopicPrefix = GetEnv("TOPIC_PREFIX", "trigger_")
+	pubsubClient.ProjectID = GetEnv("PROJECT_ID", "project")
+
+	err := pubsubClient.Connect()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	Port := GetEnv("PORT", "8080")
 
