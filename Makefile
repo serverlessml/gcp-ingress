@@ -10,8 +10,10 @@ test-run: build run
 .PHONY: build run push
 
 REGISTRY := slessml
-SERVICE := ingress
+SERVICE := ingress-gcp
 VER := 1.0
+PROJECT_ID := kedro-01
+TOPIC_PREFIX := trigger_
 
 build:
 	@docker build \
@@ -26,6 +28,6 @@ run:
 		-p 8080:8080 \
 		-v ${HOME}/projects/secrets/infra/gcp/key-pubsub.json:/key.json \
 		-e GOOGLE_APPLICATION_CREDENTIALS=/key.json \
-		-e PROJECT_ID=kedro-01 \
-		-e TOPIC_PREFIX=trigger_ \
+		-e PROJECT_ID=${PROJECT_ID} \
+		-e TOPIC_PREFIX=${TOPIC_PREFIX} \
 		-t ${REGISTRY}/${SERVICE}:${VER}
