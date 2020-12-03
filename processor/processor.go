@@ -24,7 +24,7 @@ type input struct {
 	ID string `json:"id" validate:"required,uuid4|uuid_rfc4122"`
 	// Config is the ML pipeline config
 	// it contains data preparation as well as the ML settings config
-	Config config `json:"config"`
+	Config []config `json:"config"`
 }
 
 // outputDistribution defines the output distribution config.
@@ -35,8 +35,8 @@ type outputDistribution struct {
 
 // Output defines the output object.
 type Output struct {
-	// Payload represents the output payload.
-	Payload *input
+	// Payload represents the output config payload.
+	Payload []config `json:"config"`
 	// Distribution defines the payload distribution config.
 	Distribution outputDistribution
 }
@@ -81,19 +81,9 @@ func (p *Processor) Exec(data []byte) (*Output, error) {
 	}
 
 	return &Output{
-		Payload: input,
+		Payload: input.Config,
 		Distribution: outputDistribution{
 			Topic: fmt.Sprintf("%s%s", p.TopicPrefix, input.ID),
 		},
 	}, err
-}
-
-// Marshal marshal the output object.
-func (p *Processor) Marshal(obj *Output) ([]byte, error) {
-	return json.Marshal(obj)
-}
-
-// MarshalPayload marshal the output payload object.
-func (p *Processor) MarshalPayload(obj *Output) ([]byte, error) {
-	return json.Marshal(obj.Payload)
 }
