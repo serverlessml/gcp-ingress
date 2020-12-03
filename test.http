@@ -1,0 +1,10 @@
+POST http://0.0.0.0:8080/
+Accept: application/json
+
+{
+    "id": "0cba82ff-9790-454d-b7b9-22570e7ba28c",
+    "config": {
+        "data": {},
+        "model": {}
+    }
+}
