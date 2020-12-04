@@ -11,7 +11,7 @@ test-run: build run
 
 REGISTRY := slessml
 SERVICE := ingress-gcp
-VER := 1.0
+VER := `cat VERSION`
 PROJECT_ID := kedro-01
 TOPIC_PREFIX := trigger_
 
