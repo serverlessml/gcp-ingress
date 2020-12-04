@@ -1,3 +1,8 @@
+GET http://0.0.0.0:8080/status
+Accept: application/json
+
+###
+
 POST http://0.0.0.0:8080/
 Accept: application/json
 
@@ -6,7 +11,7 @@ Accept: application/json
     "code_hash": "8c2f3d3c5dd853231c7429b099347d13c8bb2c37",
     "pipeline_config": [{
             "data": {"foo": 1},
-            "model": {"bar": 1}
+            "model": {"foo": 1}
         },
         {
             "data": {"foo": 2},
@@ -17,5 +22,5 @@ Accept: application/json
 
 ###
 
-GET http://0.0.0.0:8080/status
+GET http://0.0.0.0:8080/
 Accept: application/json

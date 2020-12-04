@@ -24,14 +24,23 @@ func GetEnv(key, fallback string) string {
 	return fallback
 }
 
-// GetPayload get request body's payload.
-func GetPayload(requestBody io.ReadCloser) ([]byte, error) {
+// GetRequestPayload get request body's payload.
+func GetRequestPayload(requestBody io.ReadCloser) ([]byte, error) {
 	payload, err := ioutil.ReadAll(requestBody)
 	defer requestBody.Close()
 	if err != nil {
 		return []byte{}, fmt.Errorf("Error reading payload: %s", err)
 	}
 	return payload, nil
+}
+
+// MustMarshal performs json.Marshal
+func MustMarshal(obj interface{}) []byte {
+	out, err := json.Marshal(obj)
+	if err != nil {
+		return nil
+	}
+	return out
 }
 
 func handleStatus(w http.ResponseWriter, r *http.Request) {
@@ -57,22 +66,11 @@ type OutputPayload struct {
 	SubmittedID []string      `json:"submitted_id"`
 }
 
-func handlerPOST(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "Method is not supported.", http.StatusMethodNotAllowed)
-		return
-	}
-
-	inputPayload, err := GetPayload(r.Body)
+// runner defines the main routine.
+func runner(data []byte) (OutputPayload, error) {
+	outputProc, err := proc.Exec(data)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	outputProc, err := proc.Exec(inputPayload)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return OutputPayload{}, err
 	}
 	outputProcPayload := &outputProc.Payload
 
@@ -96,13 +94,45 @@ func handlerPOST(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	output, _ := json.Marshal(OutputPayload{
+	return OutputPayload{
 		Errors:      outputErrors,
 		SubmittedID: outputRunIDs,
-	})
+	}, nil
+}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write(output)
+func errorResponse(w http.ResponseWriter, errMsg string, status int) {
+	w.WriteHeader(status)
+	w.Write(MustMarshal(OutputPayload{
+		Errors: []errorOutput{{
+			Message:        errMsg,
+			PipelineConfig: processor.PipelineConfig{},
+		}},
+		SubmittedID: []string{},
+	}))
+	return
+}
+
+func handlerPOST(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		errorResponse(w, "Method is not supported.", http.StatusMethodNotAllowed)
+		return
+	}
+
+	inputPayload, err := GetRequestPayload(r.Body)
+	if err != nil {
+		errorResponse(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	output, err := runner(inputPayload)
+	if err != nil {
+		errorResponse(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	outputPayload := MustMarshal(output)
+
+	w.WriteHeader(http.StatusAccepted)
+	w.Write(outputPayload)
 	return
 }
 

@@ -14,9 +14,9 @@ import (
 // PipelineConfig defines ML pipeline config.
 type PipelineConfig struct {
 	// Data represents the configuration of the data preparation for an ML experiment
-	Data map[string]interface{} `json:"data"`
+	Data map[string]interface{} `json:"data" validate:"required"`
 	// Model represents the model setting configuration
-	Model map[string]interface{} `json:"model"`
+	Model map[string]interface{} `json:"model" validate:"required"`
 }
 
 // input defines the input payload.
@@ -27,7 +27,7 @@ type input struct {
 	CodeHash string `json:"code_hash" validate:"required,sha1"`
 	// Config is the ML pipeline config
 	// it contains data preparation as well as the ML settings config
-	Config []PipelineConfig `json:"pipeline_config" validate:"required"`
+	Config []PipelineConfig `json:"pipeline_config" validate:"required,dive"`
 }
 
 // outputDistribution defines the output distribution config.
@@ -39,7 +39,7 @@ type outputDistribution struct {
 // outputPayload defines the payload returned for further transition down the ML pipeline.
 type outputPayload struct {
 	// Config is the ML pipeline config
-	Config PipelineConfig `json:"pipeline_config" validate:"required"`
+	Config PipelineConfig `json:"pipeline_config" validate:"required,dive"`
 	// CodeHash is the model codebase ID.
 	CodeHash string `json:"code_hash" validate:"required,sha1"`
 	// RunID is the experiment's ID.
@@ -107,5 +107,5 @@ func (p *Processor) Exec(data []byte) (*Output, error) {
 		Distribution: outputDistribution{
 			Topic: fmt.Sprintf("%s%s", p.TopicPrefix, input.ProjectID),
 		},
-	}, err
+	}, nil
 }
