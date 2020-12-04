@@ -9,15 +9,19 @@ COPY . .
 
 RUN apk update -q \
     && apk add --no-cache -q \
-    g++ \
-    upx \
-    && go build -a -gcflags=all="-l -B -C" -ldflags="-w -s" -o /root/runner *.go \
+        ca-certificates \
+        g++ \
+        upx \
+    && update-ca-certificates \
+    && CGO_ENABLED=0 GOARCH=386 go build -a -gcflags=all="-l -B -C" -ldflags="-w -s" -o /root/runner *.go \
     && upx -9 /root/runner
 
-FROM alpine:3.12 AS run
+FROM scratch AS run
+
+# adds x509 cert
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 WORKDIR /root
-
 COPY --from=build /root/runner .
 
 ENV PORT 8080
