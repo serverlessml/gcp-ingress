@@ -43,6 +43,20 @@ func handleStatus(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// errorOutput defines output error.
+type errorOutput struct {
+	// contains error message
+	Message string `json:"message"`
+	// contains pipeline config
+	PipelineConfig processor.PipelineConfig `json:"pipeline_config"`
+}
+
+// OutputPayload defines output payload.
+type OutputPayload struct {
+	Errors      []errorOutput `json:"errors"`
+	SubmittedID []string      `json:"submitted_id"`
+}
+
 func handlerPOST(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method is not supported.", http.StatusMethodNotAllowed)
@@ -55,28 +69,39 @@ func handlerPOST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	output, err := proc.Exec(inputPayload)
+	outputProc, err := proc.Exec(inputPayload)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	outputPayload := &output.Payload
+	outputProcPayload := &outputProc.Payload
 
-	errorsCh := make(chan error, len(*outputPayload))
-	for _, payload := range *outputPayload {
-		payloadOut, _ := json.Marshal(payload)
-		go pubsubClient.PushRoutine(payloadOut, output.Distribution.Topic, errorsCh)
+	errorsCh := make(chan error, len(*outputProcPayload))
+	for _, payload := range *outputProcPayload {
+		payloadProcOutput, _ := json.Marshal(payload)
+		go pubsubClient.PushRoutine(payloadProcOutput, outputProc.Distribution.Topic, errorsCh)
 	}
-	<-errorsCh
 
-	// for err := range errorsCh {
-	// 	if err != nil {
-	// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 		return
-	// 	}
-	// }
+	outputErrors := []errorOutput{}
+	outputRunIDs := []string{}
+	for _, item := range *outputProcPayload {
+		outputRunIDs = append(outputRunIDs, item.RunID)
+		err := <-errorsCh
+		if err != nil {
+			outputErrors = append(outputErrors, errorOutput{
+				Message:        err.Error(),
+				PipelineConfig: item.Config,
+			})
+		}
+	}
+
+	output, _ := json.Marshal(OutputPayload{
+		Errors:      outputErrors,
+		SubmittedID: outputRunIDs,
+	})
 
 	w.WriteHeader(http.StatusOK)
+	w.Write(output)
 	return
 }
 

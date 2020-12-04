@@ -7,11 +7,12 @@ import (
 	"encoding/json"
 	"fmt"
 
+	uuid "github.com/satori/go.uuid"
 	"github.com/serverlessml/gcp-ingress/validator"
 )
 
-// config defines ML pipeline config.
-type config struct {
+// PipelineConfig defines ML pipeline config.
+type PipelineConfig struct {
 	// Data represents the configuration of the data preparation for an ML experiment
 	Data map[string]interface{} `json:"data"`
 	// Model represents the model setting configuration
@@ -20,13 +21,13 @@ type config struct {
 
 // input defines the input payload.
 type input struct {
-	// ProjectID is the project ID
+	// ProjectID is the project ID.
 	ProjectID string `json:"project_id" validate:"required,uuid4|uuid_rfc4122"`
-	// CodeHash is the model codebase ID
+	// CodeHash is the model codebase ID.
 	CodeHash string `json:"code_hash" validate:"required,sha1"`
 	// Config is the ML pipeline config
 	// it contains data preparation as well as the ML settings config
-	Config []config `json:"config" validate:"required"`
+	Config []PipelineConfig `json:"pipeline_config" validate:"required"`
 }
 
 // outputDistribution defines the output distribution config.
@@ -35,10 +36,20 @@ type outputDistribution struct {
 	Topic string
 }
 
+// outputPayload defines the payload returned for further transition down the ML pipeline.
+type outputPayload struct {
+	// Config is the ML pipeline config
+	Config PipelineConfig `json:"pipeline_config" validate:"required"`
+	// CodeHash is the model codebase ID.
+	CodeHash string `json:"code_hash" validate:"required,sha1"`
+	// RunID is the experiment's ID.
+	RunID string `json:"run_id" validate:"required,uuid4"`
+}
+
 // Output defines the output object.
 type Output struct {
 	// Payload represents the output config payload.
-	Payload []config `json:"config"`
+	Payload []outputPayload
 	// Distribution defines the payload distribution config.
 	Distribution outputDistribution
 }
@@ -82,8 +93,17 @@ func (p *Processor) Exec(data []byte) (*Output, error) {
 		return &Output{}, fmt.Errorf("Input validation error: %s", err)
 	}
 
+	output := []outputPayload{}
+	for _, config := range input.Config {
+		output = append(output, outputPayload{
+			Config:   config,
+			CodeHash: input.CodeHash,
+			RunID:    fmt.Sprintf("%s", uuid.NewV4()),
+		})
+	}
+
 	return &Output{
-		Payload: input.Config,
+		Payload: output,
 		Distribution: outputDistribution{
 			Topic: fmt.Sprintf("%s%s", p.TopicPrefix, input.ProjectID),
 		},

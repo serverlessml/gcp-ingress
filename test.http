@@ -4,7 +4,7 @@ Accept: application/json
 {
     "project_id": "0cba82ff-9790-454d-b7b9-22570e7ba28c",
     "code_hash": "8c2f3d3c5dd853231c7429b099347d13c8bb2c37",
-    "config": [{
+    "pipeline_config": [{
             "data": {"foo": 1},
             "model": {"bar": 1}
         },
@@ -14,3 +14,8 @@ Accept: application/json
         }
     ]
 }
+
+###
+
+GET http://0.0.0.0:8080/status
+Accept: application/json
