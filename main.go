@@ -4,6 +4,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -59,14 +60,21 @@ func handlerPOST(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	outputPayload := &output.Payload
 
-	outputPayload, _ := proc.MarshalPayload(output)
-
-	err = pubsubClient.Push(outputPayload, output.Distribution.Topic)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	errorsCh := make(chan error, len(*outputPayload))
+	for _, payload := range *outputPayload {
+		payloadOut, _ := json.Marshal(payload)
+		go pubsubClient.PushRoutine(payloadOut, output.Distribution.Topic, errorsCh)
 	}
+	<-errorsCh
+
+	// for err := range errorsCh {
+	// 	if err != nil {
+	// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 		return
+	// 	}
+	// }
 
 	w.WriteHeader(http.StatusOK)
 	return

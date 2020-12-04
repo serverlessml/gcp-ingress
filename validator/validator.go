@@ -1,12 +1,13 @@
 // Dmitry Kisler © 2020-present
 // www.dkisler.com <admin@dkisler.com>
 
-package processor
+package validator
 
 import (
 	"reflect"
+	"regexp"
 
-	"gopkg.in/go-playground/validator.v9"
+	validator "github.com/go-playground/validator/v10"
 )
 
 // ValidationError represents validation error content.
@@ -41,4 +42,18 @@ func GetValidationErrors(err error) []ValidationError {
 		validationErrors = append(validationErrors, validationErr)
 	}
 	return validationErrors
+}
+
+var sha1 = regexp.MustCompile(`^[a-fA-F0-9]{40}$`)
+
+// IsSHA1 check if the input string is a valida SHA1 hash.
+func IsSHA1(fl validator.FieldLevel) bool {
+	return sha1.MatchString(fl.Field().String())
+}
+
+// New is instantiating a validator instance.
+func New() *validator.Validate {
+	Validator := validator.New()
+	Validator.RegisterValidation("sha1", IsSHA1, true)
+	return Validator
 }

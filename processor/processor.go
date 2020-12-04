@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gopkg.in/go-playground/validator.v9"
+	"github.com/serverlessml/gcp-ingress/validator"
 )
 
 // config defines ML pipeline config.
@@ -20,11 +20,13 @@ type config struct {
 
 // input defines the input payload.
 type input struct {
-	// ID is the experiment ID
-	ID string `json:"id" validate:"required,uuid4|uuid_rfc4122"`
+	// ProjectID is the project ID
+	ProjectID string `json:"project_id" validate:"required,uuid4|uuid_rfc4122"`
+	// CodeHash is the model codebase ID
+	CodeHash string `json:"code_hash" validate:"required,sha1"`
 	// Config is the ML pipeline config
 	// it contains data preparation as well as the ML settings config
-	Config []config `json:"config"`
+	Config []config `json:"config" validate:"required"`
 }
 
 // outputDistribution defines the output distribution config.
@@ -61,7 +63,7 @@ func validateInput(input *input) error {
 	if err == nil {
 		return nil
 	}
-	validationErrors := GetValidationErrors(err)
+	validationErrors := validator.GetValidationErrors(err)
 	if len(validationErrors) == 0 {
 		return nil
 	}
@@ -83,7 +85,7 @@ func (p *Processor) Exec(data []byte) (*Output, error) {
 	return &Output{
 		Payload: input.Config,
 		Distribution: outputDistribution{
-			Topic: fmt.Sprintf("%s%s", p.TopicPrefix, input.ID),
+			Topic: fmt.Sprintf("%s%s", p.TopicPrefix, input.ProjectID),
 		},
 	}, err
 }
