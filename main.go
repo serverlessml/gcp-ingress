@@ -85,13 +85,14 @@ func handlerPOST(w http.ResponseWriter, r *http.Request) {
 	outputErrors := []errorOutput{}
 	outputRunIDs := []string{}
 	for _, item := range *outputProcPayload {
-		outputRunIDs = append(outputRunIDs, item.RunID)
 		err := <-errorsCh
 		if err != nil {
 			outputErrors = append(outputErrors, errorOutput{
 				Message:        err.Error(),
 				PipelineConfig: item.Config,
 			})
+		} else {
+			outputRunIDs = append(outputRunIDs, item.RunID)
 		}
 	}
 
