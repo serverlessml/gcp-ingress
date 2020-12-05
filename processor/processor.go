@@ -19,8 +19,8 @@ type PipelineConfig struct {
 	Model map[string]interface{} `json:"model" validate:"required"`
 }
 
-// input defines the input payload.
-type input struct {
+// Input defines the input payload.
+type Input struct {
 	// ProjectID is the project ID.
 	ProjectID string `json:"project_id" validate:"required,uuid4|uuid_rfc4122"`
 	// CodeHash is the model codebase ID.
@@ -30,14 +30,8 @@ type input struct {
 	Config []PipelineConfig `json:"pipeline_config" validate:"required,dive"`
 }
 
-// outputDistribution defines the output distribution config.
-type outputDistribution struct {
-	// Topic is the message broker topic to push payload to.
-	Topic string
-}
-
-// outputPayload defines the payload returned for further transition down the ML pipeline.
-type outputPayload struct {
+// OutputPayload defines the payload returned for further transition down the ML pipeline.
+type OutputPayload struct {
 	// Config is the ML pipeline config
 	Config PipelineConfig `json:"pipeline_config" validate:"required,dive"`
 	// CodeHash is the model codebase ID.
@@ -46,12 +40,18 @@ type outputPayload struct {
 	RunID string `json:"run_id" validate:"required,uuid4"`
 }
 
+// OutputDistribution defines the output distribution config.
+type OutputDistribution struct {
+	// Topic is the message broker topic to push payload to.
+	Topic string
+}
+
 // Output defines the output object.
 type Output struct {
 	// Payload represents the output config payload.
-	Payload []outputPayload
+	Payload []OutputPayload
 	// Distribution defines the payload distribution config.
-	Distribution outputDistribution
+	Distribution OutputDistribution
 }
 
 // Processor defines processor.
@@ -61,23 +61,20 @@ type Processor struct {
 }
 
 // readInput reads the input data content.
-func readInput(data []byte) (*input, error) {
-	var inpt input
+func readInput(data []byte) (*Input, error) {
+	var inpt Input
 	err := json.Unmarshal(data, &inpt)
 	return &inpt, err
 }
 
 // validateInput validates the input.
-func validateInput(input *input) error {
+func validateInput(input *Input) error {
 	validate := validator.New()
 	err := validate.Struct(input)
 	if err == nil {
 		return nil
 	}
 	validationErrors := validator.GetValidationErrors(err)
-	if len(validationErrors) == 0 {
-		return nil
-	}
 	return fmt.Errorf(fmt.Sprintln(validationErrors))
 }
 
@@ -93,9 +90,9 @@ func (p *Processor) Exec(data []byte) (*Output, error) {
 		return &Output{}, fmt.Errorf("Input validation error: %s", err)
 	}
 
-	output := []outputPayload{}
+	output := []OutputPayload{}
 	for _, config := range input.Config {
-		output = append(output, outputPayload{
+		output = append(output, OutputPayload{
 			Config:   config,
 			CodeHash: input.CodeHash,
 			RunID:    fmt.Sprintf("%s", uuid.NewV4()),
@@ -104,7 +101,7 @@ func (p *Processor) Exec(data []byte) (*Output, error) {
 
 	return &Output{
 		Payload: output,
-		Distribution: outputDistribution{
+		Distribution: OutputDistribution{
 			Topic: fmt.Sprintf("%s%s", p.TopicPrefix, input.ProjectID),
 		},
 	}, nil
