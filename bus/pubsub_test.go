@@ -1,4 +1,4 @@
-package tests
+package bus_test
 
 import (
 	"testing"

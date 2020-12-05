@@ -1,4 +1,4 @@
-package tests
+package processor_test
 
 import (
 	"encoding/json"
