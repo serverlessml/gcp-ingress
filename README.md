@@ -1,5 +1,7 @@
 # Pipeline Ingress: GCP
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/serverlessml/gcp-ingress)](https://goreportcard.com/report/github.com/serverlessml/gcp-ingress)
+
 The ingress service to invoke ML pipeline. A web-server with two end-points:
 
 `GET: /status` -> status check
