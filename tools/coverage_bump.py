@@ -29,27 +29,12 @@ import os
 import re
 from pathlib import Path
 
-
-def read(path: Path) -> str:
-    """Read file."""
-    with open(path, "r") as fread:
-        return fread.read()
-
-
-def write(obj: str, path: Path) -> None:
-    """Read file."""
-    with open(path, "w") as fwrite:
-        fwrite.write(obj)
-
-
-def execute_cmd(cmd: str) -> None:
-    """Run system command."""
-    os.system(cmd)
+import utils  # type: ignore
 
 
 def run_gocover(path: Path) -> None:
     """Run gocover."""
-    execute_cmd(
+    utils.execute_cmd(
         f"""go test -coverpkg=./... -coverprofile=/tmp/go-cover.tmp ./... > /dev/null
 go tool cover -func /tmp/go-cover.tmp -o {path} && rm /tmp/go-cover.tmp"""
     )
@@ -88,13 +73,13 @@ def main() -> None:
 
     run_gocover(path_coverage)
 
-    coverage = read(path_coverage)
+    coverage = utils.read(path_coverage)
 
     coverage_pct = extract_total_coverage(coverage)
 
     badge_url = generate_url(coverage_pct)
 
-    inpt = read(path_readme)
+    inpt = utils.read(path_readme)
 
     search = re.findall(regexp_pattern, inpt)
 
@@ -105,7 +90,7 @@ def main() -> None:
 
     out = re.sub(regexp_pattern, placeholder_inject, inpt)
 
-    write(out, path_readme)
+    utils.write(out, path_readme)
 
 
 if __name__ == "__main__":

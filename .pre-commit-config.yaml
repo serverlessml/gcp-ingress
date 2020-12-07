@@ -17,8 +17,15 @@ repos:
       - id: go-mod-tidy
   - repo: local
     hooks:
+      - id: license
+        name: "Licence check"
+        language: system
+        always_run: false
+        pass_filenames: false
+        entry: make license-check
       - id: code-coverage-bump
         name: "Code Coverage Bump"
         language: system
         entry: make coverage-bump
         always_run: false
+        pass_filenames: false

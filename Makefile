@@ -42,3 +42,6 @@ test-integration: run
 
 coverage-bump:
 	@./tools/coverage_bump.py
+
+license-check:
+	@./tools/license_check.py
