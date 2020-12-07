@@ -31,16 +31,14 @@ def run_gocover(path: Path) -> None:
     """Run gocover."""
     execute_cmd(
         f"""go test -coverpkg=./... -coverprofile=/tmp/go-cover.tmp ./... > /dev/null
-go tool cover -func /tmp/go-cover.tmp -o {path}
-rm /tmp/go-cover.tmp
-"""
+go tool cover -func /tmp/go-cover.tmp -o {path} && rm /tmp/go-cover.tmp"""
     )
 
 
 def extract_total_coverage(raw: str) -> int:
     """Extract total coverage."""
     tail_line = raw.splitlines()[-1]
-    return int(tail_line.split("\t")[-1][:-1])
+    return int(float(tail_line.split("\t")[-1][:-1]))
 
 
 def generate_url(coverage_pct: float) -> str:
