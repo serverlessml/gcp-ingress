@@ -42,7 +42,7 @@ def extract_total_coverage(raw: str) -> int:
 
 
 def generate_url(coverage_pct: float) -> str:
-    "Generate badge source URL."
+    """Generate badge source URL."""
     color = "yellow"
     if coverage_pct == 100:
         color = "brightgreen"
