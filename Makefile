@@ -40,5 +40,5 @@ rm:
 test-integration: run
 	@./test_integration.sh
 
-bump-coverage:
-	@./coverage_bump.py
+coverage-bump:
+	@./tools/coverage_bump.py

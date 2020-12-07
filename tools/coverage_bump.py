@@ -80,7 +80,7 @@ def generate_url(coverage_pct: float) -> str:
 
 def main() -> None:
     """Run."""
-    root = Path(__file__).absolute().parent
+    root = Path(__file__).absolute().parents[1]
     path_readme = root / "README.md"
     path_coverage = root / "COVERAGE"
     placeholder_tag = "Code Coverage"

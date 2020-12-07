@@ -20,5 +20,5 @@ repos:
       - id: code-coverage-bump
         name: "Code Coverage Bump"
         language: system
-        entry: ./coverage_bump.py
+        entry: make coverage-bump
         always_run: false
