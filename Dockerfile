@@ -1,7 +1,8 @@
-# Dmitry Kisler © 2020-present
-# www.dkisler.com <admin@dkisler.com>
-
 FROM golang:1.15.3-alpine3.12 AS build
+
+LABEL maintener="Dmitry Kisler"
+LABEL email="admin@dkisler.com"
+LABEL web="www.serverlessml.org"
 
 WORKDIR /go/src
 
