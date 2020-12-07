@@ -5,9 +5,9 @@ package bus
 
 import (
 	"context"
-	"fmt"
 
 	"cloud.google.com/go/pubsub"
+	"google.golang.org/api/option"
 )
 
 // Client defines the client to communicate with the message bus.
@@ -19,10 +19,10 @@ type Client struct {
 }
 
 // Connect establishes connector to the message broker.
-func (c *Client) Connect() error {
+func (c *Client) Connect(opts ...option.ClientOption) error {
 	var err error
 	c.Ctx = context.Background()
-	c.Instance, err = pubsub.NewClient(c.Ctx, c.ProjectID)
+	c.Instance, err = pubsub.NewClient(c.Ctx, c.ProjectID, opts...)
 	return err
 }
 
@@ -35,10 +35,7 @@ func (c *Client) Push(payload []byte, topic string) error {
 	// Block until the result is returned and a server-generated
 	// ID is returned for the published message.
 	_, err := result.Get(c.Ctx)
-	if err != nil {
-		return fmt.Errorf("Message publish error: %v", err)
-	}
-	return nil
+	return err
 }
 
 // PushRoutine marshal the output payload object.
