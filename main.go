@@ -25,21 +25,15 @@ func GetEnv(key, fallback string) string {
 }
 
 // GetRequestPayload get request body's payload.
-func GetRequestPayload(requestBody io.ReadCloser) ([]byte, error) {
-	payload, err := ioutil.ReadAll(requestBody)
+func GetRequestPayload(requestBody io.ReadCloser) []byte {
+	payload, _ := ioutil.ReadAll(requestBody)
 	defer requestBody.Close()
-	if err != nil {
-		return []byte{}, fmt.Errorf("Error reading payload: %s", err)
-	}
-	return payload, nil
+	return payload
 }
 
 // MustMarshal performs json.Marshal
 func MustMarshal(obj interface{}) []byte {
-	out, err := json.Marshal(obj)
-	if err != nil {
-		return nil
-	}
+	out, _ := json.Marshal(obj)
 	return out
 }
 
@@ -118,9 +112,9 @@ func handlerPOST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	inputPayload, err := GetRequestPayload(r.Body)
-	if err != nil {
-		errorResponse(w, err.Error(), http.StatusBadRequest)
+	inputPayload := GetRequestPayload(r.Body)
+	if inputPayload == nil {
+		errorResponse(w, "Empty of faulty payload", http.StatusBadRequest)
 		return
 	}
 
@@ -129,8 +123,8 @@ func handlerPOST(w http.ResponseWriter, r *http.Request) {
 		errorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	outputPayload := MustMarshal(output)
 
+	outputPayload := MustMarshal(output)
 	w.WriteHeader(http.StatusAccepted)
 	w.Write(outputPayload)
 	return
