@@ -1,3 +1,6 @@
+// Dmitry Kisler © 2020-present
+// www.dkisler.com <admin@dkisler.com>
+
 package processor_test
 
 import (

@@ -1,4 +1,8 @@
 #! /usr/local/bin/python3
+
+# Dmitry Kisler © 2020-present
+# www.dkisler.com <admin@dkisler.com>
+
 """Tool to patch the README.md with the code coderage badde
 
 https://shields.io/ is used to generate badges
