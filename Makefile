@@ -14,6 +14,8 @@ SERVICE := ingress-gcp
 VER := `cat VERSION`
 PROJECT_ID := kedro-01
 TOPIC_PREFIX := trigger_
+BG := -d --name=ingress-gcp-test
+
 
 build:
 	@docker build \
@@ -24,10 +26,16 @@ push:
 	@docker push ${REGISTRY}/${SERVICE}:${VER}
 
 run:
-	@docker run \
+	@docker run $(BG) \
 		-p 8080:8080 \
 		-v ${HOME}/projects/secrets/infra/gcp/key-pubsub.json:/key.json \
 		-e GOOGLE_APPLICATION_CREDENTIALS=/key.json \
 		-e PROJECT_ID=${PROJECT_ID} \
 		-e TOPIC_PREFIX=${TOPIC_PREFIX} \
 		-t ${REGISTRY}/${SERVICE}:${VER}
+
+rm:
+	@docker rm -f ingress-gcp-test
+
+test-integration: run
+	@./test_integration.sh
