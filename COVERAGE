@@ -5,7 +5,7 @@ github.com/serverlessml/gcp-ingress/main.go:20:			GetEnv			100.0%
 github.com/serverlessml/gcp-ingress/main.go:28:			GetRequestPayload	100.0%
 github.com/serverlessml/gcp-ingress/main.go:35:			MustMarshal		100.0%
 github.com/serverlessml/gcp-ingress/main.go:40:			handleStatus		0.0%
-github.com/serverlessml/gcp-ingress/main.go:64:			runner			18.8%
+github.com/serverlessml/gcp-ingress/main.go:64:			runner			100.0%
 github.com/serverlessml/gcp-ingress/main.go:97:			errorResponse		0.0%
 github.com/serverlessml/gcp-ingress/main.go:109:		handlerPOST		0.0%
 github.com/serverlessml/gcp-ingress/main.go:138:		main			0.0%
@@ -15,4 +15,4 @@ github.com/serverlessml/gcp-ingress/processor/processor.go:82:	Exec			100.0%
 github.com/serverlessml/gcp-ingress/validator/validator.go:13:	GetValidationErrors	100.0%
 github.com/serverlessml/gcp-ingress/validator/validator.go:27:	IsSHA1			100.0%
 github.com/serverlessml/gcp-ingress/validator/validator.go:32:	New			100.0%
-total:								(statements)		53.1%
+total:								(statements)		66.7%
