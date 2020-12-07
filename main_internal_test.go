@@ -23,6 +23,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"reflect"
 	"strings"
@@ -135,7 +137,8 @@ func getMockServer() *grpc.ClientConn {
 func getClient() bus.Client {
 	var c bus.Client
 	c.ProjectID = "test"
-	c.Connect(option.WithGRPCConn(getMockServer()))
+	c.Opts = append(c.Opts, option.WithGRPCConn(getMockServer()))
+	c.Connect()
 	return c
 }
 
@@ -217,3 +220,142 @@ func TestRunner(t *testing.T) {
 		}
 	}
 }
+
+func TestErrorResponse(t *testing.T) {
+	type args struct {
+		errMsg string
+		status int
+	}
+
+	tests := []struct {
+		in   *args
+		want string
+	}{
+		{
+			in: &args{
+				errMsg: "foobar",
+				status: 404,
+			},
+			want: `{"errors":[{"message":"foobar","pipeline_config":{"data":null,"model":null}}],"submitted_id":[]}`,
+		},
+	}
+
+	for _, test := range tests {
+		w := httptest.NewRecorder()
+		errorResponse(w, test.in.errMsg, test.in.status)
+		got := w.Result()
+		gotStatusCode := got.StatusCode
+
+		if gotStatusCode != test.in.status {
+			t.Fatalf("Results don't match\nwant: %d\ngot: %d", test.in.status, gotStatusCode)
+		}
+
+		body, _ := ioutil.ReadAll(got.Body)
+		gotResp := string(body)
+		if gotResp != test.want {
+			t.Fatalf("Results don't match\nwant: %s\ngot: %s", test.want, gotResp)
+		}
+	}
+}
+
+func TestHandlerStatus(t *testing.T) {
+	tests := []struct {
+		name string
+		in   *http.Request
+		want int
+	}{
+		{
+			name: "Positive",
+			in:   httptest.NewRequest("GET", "http://0.0.0.0:8080", nil),
+			want: http.StatusOK,
+		},
+		{
+			name: "Negative: wrong request type",
+			in:   httptest.NewRequest("POST", "http://0.0.0.0:8080", nil),
+			want: http.StatusMethodNotAllowed,
+		},
+	}
+
+	for _, test := range tests {
+		w := httptest.NewRecorder()
+		handlerStatus(w, test.in)
+		got := w.Result().StatusCode
+		if got != test.want {
+			t.Fatalf("[%s]: Results don't match\nwant: %d\ngot: %d",
+				test.name, test.want, got)
+		}
+	}
+}
+
+func TestHandlerPost(t *testing.T) {
+	pubsubClient = getClient()
+
+	tests := []struct {
+		name string
+		in   *http.Request
+		want int
+	}{
+		{
+			name: "Negative: wrong request type",
+			in:   httptest.NewRequest("GET", "http://0.0.0.0:8080/status", nil),
+			want: http.StatusMethodNotAllowed,
+		},
+		{
+			name: "Negative: wrong request body",
+			in:   httptest.NewRequest("POST", "http://0.0.0.0:8080/status", strings.NewReader("")),
+			want: http.StatusBadRequest,
+		},
+		{
+			name: "Positive",
+			in: httptest.NewRequest("POST", "http://0.0.0.0:8080/status", strings.NewReader(`{
+    "project_id": "0cba82ff-9790-454d-b7b9-22570e7ba28c",
+    "code_hash": "8c2f3d3c5dd853231c7429b099347d13c8bb2c37",
+    "pipeline_config": [{
+            "data": {"foo": 1},
+            "model": {"foo": 1}
+        },
+        {
+            "data": {"foo": 2},
+            "model": {"bar": 2}
+        }
+    ]
+}`)),
+			want: http.StatusAccepted,
+		},
+	}
+	for _, test := range tests {
+		w := httptest.NewRecorder()
+		handlerPOST(w, test.in)
+		got := w.Result().StatusCode
+		if got != test.want {
+			t.Fatalf("[%s]: Results don't match\nwant: %d\ngot: %d",
+				test.name, test.want, got)
+		}
+	}
+}
+
+func TestMain(t *testing.T) {
+	pubsubClient = getClient()
+	main()
+	httpSrv.Close()
+}
+
+// func TestMainNegative(t *testing.T) {
+
+// 	if os.Getenv("BE_CRASHER") == "1" {
+// 		// googleCredentials := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+// 		// os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "")
+// 		main()
+// 		httpSrv.Close()
+// 		// os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", googleCredentials)
+// 		return
+// 	}
+
+// 	cmd := exec.Command(os.Args[0], "-test.run=TestMain")
+// 	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
+// 	err := cmd.Run()
+// 	if e, ok := err.(*exec.ExitError); ok && !e.Success() {
+// 		return
+// 	}
+// 	t.Fatalf("process ran with err %v, want exit status 1", err)
+// }

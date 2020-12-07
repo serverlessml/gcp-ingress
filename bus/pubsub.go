@@ -31,14 +31,15 @@ type Client struct {
 	// GCP Project ID
 	ProjectID string
 	Ctx       context.Context
+	Opts      []option.ClientOption
 	Instance  *pubsub.Client
 }
 
 // Connect establishes connector to the message broker.
-func (c *Client) Connect(opts ...option.ClientOption) error {
+func (c *Client) Connect() error {
 	var err error
 	c.Ctx = context.Background()
-	c.Instance, err = pubsub.NewClient(c.Ctx, c.ProjectID, opts...)
+	c.Instance, err = pubsub.NewClient(c.Ctx, c.ProjectID, c.Opts...)
 	return err
 }
 

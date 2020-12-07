@@ -53,7 +53,7 @@ func MustMarshal(obj interface{}) []byte {
 	return out
 }
 
-func handleStatus(w http.ResponseWriter, r *http.Request) {
+func handlerStatus(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method is not supported.", http.StatusMethodNotAllowed)
 		return
@@ -129,10 +129,6 @@ func handlerPOST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	inputPayload := GetRequestPayload(r.Body)
-	if inputPayload == nil {
-		errorResponse(w, "Empty of faulty payload", http.StatusBadRequest)
-		return
-	}
 
 	output, err := runner(inputPayload)
 	if err != nil {
@@ -149,20 +145,24 @@ func handlerPOST(w http.ResponseWriter, r *http.Request) {
 var (
 	proc         processor.Processor
 	pubsubClient bus.Client
+	httpSrv      http.Server
 )
 
 func main() {
 	proc.TopicPrefix = GetEnv("TOPIC_PREFIX", "trigger_")
 	pubsubClient.ProjectID = GetEnv("PROJECT_ID", "project")
+	httpSrv.Addr = fmt.Sprintf(":%s", GetEnv("PORT", "8080"))
 
 	err := pubsubClient.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	Port := GetEnv("PORT", "8080")
-
-	http.HandleFunc("/status", handleStatus)
+	http.HandleFunc("/status", handlerStatus)
 	http.HandleFunc("/", handlerPOST)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", Port), nil))
+	go func() {
+		if err := httpSrv.ListenAndServe(); err != http.ErrServerClosed {
+			log.Fatalf("ListenAndServe(): %v", err)
+		}
+	}()
 }

@@ -36,12 +36,18 @@ func getMockServer() *grpc.ClientConn {
 	return conn
 }
 
-func getClient() bus.Client {
+var MockServerOptions []option.ClientOption = []option.ClientOption{option.WithGRPCConn(getMockServer())}
+
+func getClient() (bus.Client, error) {
 	c := client
 	c.ProjectID = "test"
-	c.Connect(option.WithGRPCConn(getMockServer()))
+	c.Opts = MockServerOptions
+	err := c.Connect()
+	if err != nil {
+		return bus.Client{}, err
+	}
 	c.Instance.CreateTopic(c.Ctx, "foo")
-	return c
+	return c, nil
 }
 
 type input struct {
@@ -54,18 +60,14 @@ func TestConnect(t *testing.T) {
 	mockServer := getMockServer()
 	defer mockServer.Close()
 
-	c := client
-	c.ProjectID = "test"
-	err := c.Connect(option.WithGRPCConn(mockServer))
-	defer c.Instance.Close()
+	_, err := getClient()
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestPush(t *testing.T) {
-	c := getClient()
-	defer c.Instance.Close()
+	c, _ := getClient()
 
 	tests := []struct {
 		name    string
@@ -109,7 +111,7 @@ func TestPush(t *testing.T) {
 }
 
 func TestPushRoutine(t *testing.T) {
-	c := getClient()
+	c, _ := getClient()
 	defer c.Instance.Close()
 
 	tests := []struct {
