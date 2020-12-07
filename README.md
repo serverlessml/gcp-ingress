@@ -1,6 +1,6 @@
 # Pipeline Ingress: GCP
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/serverlessml/gcp-ingress)](https://goreportcard.com/report/github.com/serverlessml/gcp-ingress) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/741b0eb31b494469a2cedb2046fe60fb)](https://www.codacy.com/gh/serverlessml/gcp-ingress/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=serverlessml/gcp-ingress&amp;utm_campaign=Badge_Grade) [![Code Coverage](https://img.shields.io/badge/coverage-97%25-green)](https://img.shields.io/badge/coverage-97%25-green)
+[![Go Report Card](https://goreportcard.com/badge/github.com/serverlessml/gcp-ingress)](https://goreportcard.com/report/github.com/serverlessml/gcp-ingress) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/741b0eb31b494469a2cedb2046fe60fb)](https://www.codacy.com/gh/serverlessml/gcp-ingress/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=serverlessml/gcp-ingress&amp;utm_campaign=Badge_Grade) [![Code Coverage](https://img.shields.io/badge/coverage-89%25-yellowgreen)](https://img.shields.io/badge/coverage-89%25-yellowgreen)
 
 The ingress service to invoke ML pipeline. A web-server with two end-points:
 

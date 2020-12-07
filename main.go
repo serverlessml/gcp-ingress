@@ -145,13 +145,12 @@ func handlerPOST(w http.ResponseWriter, r *http.Request) {
 var (
 	proc         processor.Processor
 	pubsubClient bus.Client
-	httpSrv      http.Server
 )
 
 func main() {
 	proc.TopicPrefix = GetEnv("TOPIC_PREFIX", "trigger_")
 	pubsubClient.ProjectID = GetEnv("PROJECT_ID", "project")
-	httpSrv.Addr = fmt.Sprintf(":%s", GetEnv("PORT", "8080"))
+	httpSrv := &http.Server{Addr: fmt.Sprintf(":%s", GetEnv("PORT", "8080"))}
 
 	err := pubsubClient.Connect()
 	if err != nil {
@@ -160,9 +159,8 @@ func main() {
 
 	http.HandleFunc("/status", handlerStatus)
 	http.HandleFunc("/", handlerPOST)
-	go func() {
-		if err := httpSrv.ListenAndServe(); err != http.ErrServerClosed {
-			log.Fatalf("ListenAndServe(): %v", err)
-		}
-	}()
+
+	if err := httpSrv.ListenAndServe(); err != http.ErrServerClosed {
+		log.Fatalf("ListenAndServe(): %v", err)
+	}
 }

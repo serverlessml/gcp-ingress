@@ -8,11 +8,11 @@ github.com/serverlessml/gcp-ingress/main.go:56:			handlerStatus		100.0%
 github.com/serverlessml/gcp-ingress/main.go:80:			runner			100.0%
 github.com/serverlessml/gcp-ingress/main.go:113:		errorResponse		100.0%
 github.com/serverlessml/gcp-ingress/main.go:125:		handlerPOST		100.0%
-github.com/serverlessml/gcp-ingress/main.go:151:		main			81.8%
+github.com/serverlessml/gcp-ingress/main.go:150:		main			0.0%
 github.com/serverlessml/gcp-ingress/processor/processor.go:80:	readInput		100.0%
 github.com/serverlessml/gcp-ingress/processor/processor.go:87:	validateInput		100.0%
 github.com/serverlessml/gcp-ingress/processor/processor.go:98:	Exec			100.0%
 github.com/serverlessml/gcp-ingress/validator/validator.go:29:	GetValidationErrors	100.0%
 github.com/serverlessml/gcp-ingress/validator/validator.go:43:	IsSHA1			100.0%
 github.com/serverlessml/gcp-ingress/validator/validator.go:48:	New			100.0%
-total:								(statements)		97.9%
+total:								(statements)		89.4%

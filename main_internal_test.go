@@ -333,29 +333,3 @@ func TestHandlerPost(t *testing.T) {
 		}
 	}
 }
-
-func TestMain(t *testing.T) {
-	pubsubClient = getClient()
-	main()
-	httpSrv.Close()
-}
-
-// func TestMainNegative(t *testing.T) {
-
-// 	if os.Getenv("BE_CRASHER") == "1" {
-// 		// googleCredentials := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
-// 		// os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "")
-// 		main()
-// 		httpSrv.Close()
-// 		// os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", googleCredentials)
-// 		return
-// 	}
-
-// 	cmd := exec.Command(os.Args[0], "-test.run=TestMain")
-// 	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
-// 	err := cmd.Run()
-// 	if e, ok := err.(*exec.ExitError); ok && !e.Success() {
-// 		return
-// 	}
-// 	t.Fatalf("process ran with err %v, want exit status 1", err)
-// }
