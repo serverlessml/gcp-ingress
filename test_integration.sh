@@ -1,4 +1,4 @@
-# bin/bash
+#! /bin/bash
 
 curl -isX GET "http://0.0.0.0:8080/status" | grep "200 OK" | if [ $(wc -l) -eq 0 ]; then echo "FAIL: Health check unreachable"; exit 1; fi
 
