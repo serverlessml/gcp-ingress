@@ -136,11 +136,11 @@ func TestRunner(t *testing.T) {
 			in:   probe,
 			want: OutputPayload{
 				Errors: []errorOutput{
-					errorOutput{
+					{
 						PipelineConfig: processor.PipelineConfig{Data: map[string]interface{}{"foo": 1}, Model: map[string]interface{}{"foo": 1}},
 						Message:        `rpc error: code = NotFound desc = topic "projects/test/topics/0cba82ff-9790-454d-b7b9-22570e7ba28c"`,
 					},
-					errorOutput{
+					{
 						PipelineConfig: processor.PipelineConfig{Data: map[string]interface{}{"foo": 2}, Model: map[string]interface{}{"bar": 2}},
 						Message:        `rpc error: code = NotFound desc = topic "projects/test/topics/0cba82ff-9790-454d-b7b9-22570e7ba28c"`,
 					},
