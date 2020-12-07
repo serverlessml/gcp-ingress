@@ -23,7 +23,7 @@ The ingress service to invoke ML pipeline. A web-server with two end-points:
 ```
 
 2. Push the payload to a GCP PubSub topic
-3. Return 200 as response in case of success
+3. Return 202 as response in case of success
 
 ## How to run
 !Note! It requires an existing GCP account with activated pubsub API, service account (SA) with PubSub Write permissions and a pubsub topic. Once SA is created, generate and download the access key to `${PATH_TO_SERVICE_ACCOUNT_KEY}/key-pubsub.json`.
@@ -74,7 +74,7 @@ curl -iX POST "http://0.0.0.0:8080/" -d '{"id": "0cba82ff-9790-454d-b7b9-22570e7
 
 Expected output:
 ```bash
-HTTP/1.1 200 OK
+HTTP/1.1 202 Accepted
 Date: YOUR CURRENT DATE/TIME
 Content-Length: 0
 ```
