@@ -1,5 +1,4 @@
 #! /usr/local/bin/python3
-
 """Tool to patch the README.md with the code coderage badde
 
 https://shields.io/ is used to generate badges
@@ -12,24 +11,24 @@ from pathlib import Path
 
 
 def read(path: Path) -> str:
-    "Read file."
+    """Read file."""
     with open(path, "r") as fread:
         return fread.read()
 
 
 def write(obj: str, path: Path) -> None:
-    "Read file."
+    """Read file."""
     with open(path, "w") as fwrite:
         fwrite.write(obj)
 
 
 def execute_cmd(cmd: str) -> None:
-    "Run system command."
+    """Run system command."""
     os.system(cmd)
 
 
 def run_gocover(path: Path) -> None:
-    "Run gocover."
+    """Run gocover."""
     execute_cmd(
         f"""go test -coverpkg=./... -coverprofile=/tmp/go-cover.tmp ./... > /dev/null
 go tool cover -func /tmp/go-cover.tmp -o {path}
@@ -38,10 +37,10 @@ rm /tmp/go-cover.tmp
     )
 
 
-def extract_total_coverage(raw: str) -> float:
-    "Extract total coverage"
+def extract_total_coverage(raw: str) -> int:
+    """Extract total coverage."""
     tail_line = raw.splitlines()[-1]
-    return float(tail_line.split("\t")[-1][:-1])
+    return int(tail_line.split("\t")[-1][:-1])
 
 
 def generate_url(coverage_pct: float) -> str:
@@ -62,7 +61,7 @@ def generate_url(coverage_pct: float) -> str:
 
 
 def main() -> None:
-    "Run."
+    """Run."""
     root = Path(__file__).absolute().parent
     path_readme = root / "README.md"
     path_coverage = root / "COVERAGE"
