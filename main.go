@@ -150,7 +150,6 @@ var (
 func main() {
 	proc.TopicPrefix = GetEnv("TOPIC_PREFIX", "trigger_")
 	pubsubClient.ProjectID = GetEnv("PROJECT_ID", "project")
-	httpSrv := &http.Server{Addr: fmt.Sprintf(":%s", GetEnv("PORT", "8080"))}
 
 	err := pubsubClient.Connect()
 	if err != nil {
@@ -160,7 +159,7 @@ func main() {
 	http.HandleFunc("/status", handlerStatus)
 	http.HandleFunc("/", handlerPOST)
 
-	if err := httpSrv.ListenAndServe(); err != http.ErrServerClosed {
-		log.Fatalf("ListenAndServe(): %v", err)
-	}
+	log.Fatalf("ListenAndServe(): %v",
+		http.ListenAndServe(fmt.Sprintf(":%s", GetEnv("PORT", "8080")), nil),
+	)
 }

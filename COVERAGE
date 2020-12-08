@@ -15,4 +15,4 @@ github.com/serverlessml/gcp-ingress/processor/processor.go:98:	Exec			100.0%
 github.com/serverlessml/gcp-ingress/validator/validator.go:29:	GetValidationErrors	100.0%
 github.com/serverlessml/gcp-ingress/validator/validator.go:43:	IsSHA1			100.0%
 github.com/serverlessml/gcp-ingress/validator/validator.go:48:	New			100.0%
-total:								(statements)		89.4%
+total:								(statements)		91.3%
