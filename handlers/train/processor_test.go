@@ -17,14 +17,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package processor_test
+package train_test
 
 import (
 	"encoding/json"
 	"reflect"
 	"testing"
 
-	"github.com/serverlessml/gcp-ingress/processor"
+	"github.com/serverlessml/gcp-ingress/handlers/train"
 )
 
 func mustMarshal(obj interface{}) []byte {
@@ -39,23 +39,31 @@ func TestExec(t *testing.T) {
 	tests := []struct {
 		name    string
 		in      []byte
-		want    processor.Output
+		want    train.Output
 		isError bool
 	}{
 		{
 			name: "Positive",
-			in:   []byte(`{"project_id": "0cba82ff-9790-454d-b7b9-22570e7ba28c", "code_hash": "8c2f3d3c5dd853231c7429b099347d13c8bb2c37", "pipeline_config": [{"data": {}, "model": {}}]}`),
-			want: processor.Output{
-				Payload: []processor.OutputPayload{{
+			in:   []byte(`{"project_id": "0cba82ff-9790-454d-b7b9-22570e7ba28c", "code_hash": "8c2f3d3c5dd853231c7429b099347d13c8bb2c37", "pipeline_config": [{"data": {"location": {"source": "gcs://test/test.csv"}, "prep_config": {}}, "model": {"hyperparameters": {}, "version": "v1"}}]}`),
+			want: train.Output{
+				Payload: []train.OutputPayload{{
 					CodeHash: "8c2f3d3c5dd853231c7429b099347d13c8bb2c37",
 					RunID:    "0cba82ff-9790-454d-b7b9-22570e7ba28c",
-					Config: processor.PipelineConfig{
-						Data:  map[string]interface{}{},
-						Model: map[string]interface{}{},
+					Config: train.PipelineConfig{
+						Data: train.DataConfig{
+							Location: train.Location{
+								Source: "gcs://test/test.csv",
+							},
+							PrepConfig: map[string]interface{}{},
+						},
+						Model: train.ModelConfig{
+							Hyperparameters: map[string]interface{}{},
+							Version:         "v1",
+						},
 					},
 				}},
-				Distribution: processor.OutputDistribution{
-					Topic: "trigger_0cba82ff-9790-454d-b7b9-22570e7ba28c",
+				Distribution: train.OutputDistribution{
+					Topic: "trigger_0cba82ff-9790-454d-b7b9-22570e7ba28c-train",
 				},
 			},
 			isError: false,
@@ -63,19 +71,21 @@ func TestExec(t *testing.T) {
 		{
 			name:    "Negative: json parsing error",
 			in:      []byte(`{"project_id": "0cba82ff-9790-454d-b7b9-22570e7ba28c"`),
-			want:    processor.Output{},
+			want:    train.Output{},
 			isError: true,
 		},
 		{
 			name:    "Negative: validation error",
 			in:      []byte(`{"project_id": "0cba82ff-9790-454d-b7b9-22570e7ba28c", "code_hash": "foobar", "pipeline_config": [{"data": {}, "model": {}}]}`),
-			want:    processor.Output{},
+			want:    train.Output{},
 			isError: true,
 		},
 	}
 
-	var proc processor.Processor
-	proc.TopicPrefix = "trigger_"
+	proc := train.Processor{
+		TopicPrefix: "trigger_",
+		ProjectID:   "0cba82ff-9790-454d-b7b9-22570e7ba28c",
+	}
 
 	for _, test := range tests {
 		got, err := proc.Exec(test.in)

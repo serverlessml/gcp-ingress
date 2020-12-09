@@ -3,7 +3,7 @@ Accept: application/json
 
 ###
 
-POST http://0.0.0.0:8080/
+POST http://0.0.0.0:8080/train
 Accept: application/json
 
 {
@@ -22,5 +22,28 @@ Accept: application/json
 
 ###
 
-GET http://0.0.0.0:8080/
+POST http://0.0.0.0:8080/predict
+Accept: application/json
+
+{
+    "project_id": "0cba82ff-9790-454d-b7b9-22570e7ba28c",
+    "train_id": "8d9f7a7d-14ab-42fc-afe4-e1c3ecfc3524",
+    "pipeline_config": [{
+            "data": {
+                "location": {
+                    "source": "gcs://test/test.csv",
+                    "destination": "gcs://test/test_output.csv"
+            }
+        }
+    }]
+}
+
+###
+
+GET http://0.0.0.0:8080/train
+Accept: application/json
+
+###
+
+GET http://0.0.0.0:8080/predict
 Accept: application/json
