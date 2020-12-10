@@ -17,10 +17,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package predict
+package config
 
-// InputJSONSchema defines the json schema for input payload
-const InputJSONSchema string = `{
+// InputJSONSchemaPredict defines the json schema for input payload to invoke prediction pipeline
+const InputJSONSchemaPredict string = `{
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
         "uuid4": {

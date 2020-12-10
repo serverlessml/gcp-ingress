@@ -17,14 +17,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package train_test
+package handlers_test
 
 import (
 	"encoding/json"
 	"reflect"
 	"testing"
 
-	"github.com/serverlessml/gcp-ingress/handlers/train"
+	"github.com/serverlessml/gcp-ingress/handlers"
 )
 
 func mustMarshal(obj interface{}) []byte {
@@ -39,13 +39,13 @@ func TestExec(t *testing.T) {
 	tests := []struct {
 		name    string
 		in      []byte
-		want    train.Output
+		want    *handlers.OutputPayload
 		isError bool
 	}{
 		{
 			name: "Positive",
 			in:   []byte(`{"project_id": "0cba82ff-9790-454d-b7b9-22570e7ba28c", "code_hash": "8c2f3d3c5dd853231c7429b099347d13c8bb2c37", "pipeline_config": [{"data": {"location": {"source": "gcs://test/test.csv"}, "prep_config": {}}, "model": {"hyperparameters": {}, "version": "v1"}}]}`),
-			want: train.Output{
+			want: &handlers.OutputPayload{
 				Payload: []train.OutputPayload{{
 					CodeHash: "8c2f3d3c5dd853231c7429b099347d13c8bb2c37",
 					RunID:    "0cba82ff-9790-454d-b7b9-22570e7ba28c",

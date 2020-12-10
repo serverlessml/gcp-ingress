@@ -17,7 +17,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package train
+package handlers
 
 import (
 	"encoding/json"
@@ -25,53 +25,73 @@ import (
 
 	uuid "github.com/satori/go.uuid"
 	"github.com/serverlessml/gcp-ingress/bus"
-	"github.com/serverlessml/gcp-ingress/handlers"
 )
 
 // Processor defines processor for predict pipeline.
 type Processor struct {
-	// ProjectID represents cloud Project ID.
-	ProjectID string
+	// Type defines the execution type, either train, or predict
+	Type string
 	// TopicPrefix represents prefix of the topic to post the payload to.
 	TopicPrefix string
+	// InputJSONSchema defines the jsonschema of the input payload.
+	InputJSONSchema string
 	// Message bus to disctribute messages
 	Bus *bus.Client
 }
 
 // Exec run processor sequence.
-func (p *Processor) Exec(data []byte) (*handlers.OutputPayload, error) {
-	errs := handlers.Validate(InputJSONSchema, data)
+func (p *Processor) Exec(data []byte) (*OutputPayload, error) {
+	errs := Validate(p.InputJSONSchema, data)
 	if errs != nil {
-		return &handlers.OutputPayload{}, errs
+		return nil, errs
 	}
 
 	var input Input
 	err := json.Unmarshal(data, &input)
 	if err != nil {
-		return &handlers.OutputPayload{}, handlers.NewUnmarshallerError(err)
+		return nil, NewUnmarshallerError(err)
 	}
 
-	topic := fmt.Sprintf("%s%s-train", p.TopicPrefix, input.ProjectID)
+	errorsCh, runIDs := p.distubuteData(input)
 
+	return p.formatOutput(input.Config, errorsCh, runIDs), nil
+}
+
+// distubuteData distributes data further down pipeline.
+// any output interfaces can be plugged in here, e.g. pubsub, kafka, db
+func (p *Processor) distubuteData(input Input) (chan error, []string) {
+	topic := fmt.Sprintf("%s%s-%s", p.TopicPrefix, input.ProjectID, p.Type)
 	errorsCh := make(chan error, len(input.Config))
 	runIDs := []string{}
 	for _, config := range input.Config {
 		runID := fmt.Sprintf("%s", uuid.NewV4())
-		payloadPush, _ := json.Marshal(PushPayload{
-			CodeHash: input.CodeHash,
-			RunID:    runID,
-			Config:   config,
-		})
-		go p.Bus.PushRoutine(payloadPush, topic, errorsCh)
+
+		payload := map[string]interface{}{
+			"run_id": runID,
+			"config": config,
+		}
+		switch p.Type {
+		case "train":
+			payload["code_hash"] = input.CodeHash
+		case "predict":
+			payload["train_id"] = input.TrainID
+		}
+
+		go p.Bus.PushRoutine(MustMarshal(payload), topic, errorsCh)
+
 		runIDs = append(runIDs, runID)
 	}
+	return errorsCh, runIDs
+}
 
+// formatOutput formats output of the main processor's method.
+func (p *Processor) formatOutput(configs []interface{}, errorsCh chan error, runIDs []string) *OutputPayload {
 	pushErrors := []string{}
 	outputRunIDs := []string{}
-	for i, config := range input.Config {
+	for i, config := range configs {
 		err := <-errorsCh
 		if err != nil {
-			e := handlers.ErrorPush{
+			e := ErrorPush{
 				Message: err.Error(),
 				Details: config,
 			}
@@ -80,9 +100,8 @@ func (p *Processor) Exec(data []byte) (*handlers.OutputPayload, error) {
 			outputRunIDs = append(outputRunIDs, runIDs[i])
 		}
 	}
-
-	return &handlers.OutputPayload{
+	return &OutputPayload{
 		Errors:      pushErrors,
 		SubmittedID: outputRunIDs,
-	}, nil
+	}
 }

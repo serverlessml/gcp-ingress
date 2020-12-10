@@ -17,10 +17,10 @@
 // // See the License for the specific language governing permissions and
 // // limitations under the License.
 
-package train
+package config
 
-// InputJSONSchema defines json schema for input payload.
-const InputJSONSchema string = `{
+// InputJSONSchemaTrain defines json schema for input payload to invoke train pipeline.
+const InputJSONSchemaTrain string = `{
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
         "path": {

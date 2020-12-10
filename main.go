@@ -17,6 +17,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// +build !test
+
 package main
 
 import (
@@ -26,9 +28,8 @@ import (
 	"os"
 
 	"github.com/serverlessml/gcp-ingress/bus"
+	"github.com/serverlessml/gcp-ingress/config"
 	"github.com/serverlessml/gcp-ingress/handlers"
-	"github.com/serverlessml/gcp-ingress/handlers/predict"
-	"github.com/serverlessml/gcp-ingress/handlers/train"
 )
 
 // GetEnv extracts envvar with default value
@@ -49,16 +50,18 @@ func main() {
 		log.Fatal(err)
 	}
 
-	procTrain := &train.Processor{
-		ProjectID:   projectID,
-		TopicPrefix: topicPrefix,
-		Bus:         pubsubClient,
+	procTrain := &handlers.Processor{
+		Type:            "train",
+		TopicPrefix:     topicPrefix,
+		InputJSONSchema: config.InputJSONSchemaTrain,
+		Bus:             pubsubClient,
 	}
 
-	procPredict := &predict.Processor{
-		ProjectID:   projectID,
-		TopicPrefix: topicPrefix,
-		Bus:         pubsubClient,
+	procPredict := &handlers.Processor{
+		Type:            "predict",
+		TopicPrefix:     topicPrefix,
+		InputJSONSchema: config.InputJSONSchemaPredict,
+		Bus:             pubsubClient,
 	}
 
 	http.HandleFunc("/status", handlers.HandlerStatus)

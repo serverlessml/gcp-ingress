@@ -21,6 +21,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -56,5 +57,32 @@ func HandlerStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+	return
+}
+
+// HandlerPOST http handler to invoke train pipeline.
+func (p *Processor) HandlerPOST(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		HandlerError(w, []error{errors.New("Method is not supported")}, http.StatusMethodNotAllowed)
+		return
+	}
+
+	inputPayload := GetRequestPayload(r.Body)
+
+	output, err := p.Exec(inputPayload)
+	if err != nil {
+		var status int
+		switch eType := (err.(Error)).Type; eType {
+		case "parsing":
+			status = http.StatusBadRequest
+		case "validation":
+			status = http.StatusUnprocessableEntity
+		}
+		HandlerError(w, []error{err}, status)
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+	w.Write(MustMarshal(output))
 	return
 }
