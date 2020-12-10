@@ -19,23 +19,6 @@
 
 package predict
 
-// Location defines object location.
-type Location struct {
-	Source      string `json:"source"`
-	Destination string `json:"destination"`
-}
-
-// DataConfig defines data preparation config.
-type DataConfig struct {
-	Location Location `json:"location"`
-}
-
-// PipelineConfig defines ML pipeline config.
-type PipelineConfig struct {
-	// Data represents the configuration of the data preparation for an ML experiment
-	Data DataConfig `json:"data"`
-}
-
 // Input defines the input payload to invoke pipeline for prediction.
 type Input struct {
 	// Model project ID (there may be several model projects within one cloud project).
@@ -54,4 +37,21 @@ type PushPayload struct {
 	TrainID string `json:"train_id"`
 	// Config is the ML pipeline config
 	Config PipelineConfig `json:"pipeline_config"`
+}
+
+// PipelineConfig defines ML pipeline config.
+type PipelineConfig struct {
+	// Data represents the configuration of the data preparation for an ML experiment
+	Data DataConfig `json:"data"`
+}
+
+// DataConfig defines data preparation config.
+type DataConfig struct {
+	Location Location `json:"location"`
+}
+
+// Location defines object location.
+type Location struct {
+	Source      string `json:"source"`
+	Destination string `json:"destination"`
 }

@@ -18,8 +18,7 @@ Accept: application/json
         "prep_config": {}
       },
       "model": {
-        "hyperparameters": {},
-        "version": "v1"
+        "hyperparameters": {}
       }
     }
   ]

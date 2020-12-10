@@ -20,15 +20,16 @@
 package predict
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/serverlessml/gcp-ingress/handlers"
 )
 
-// HandlerPOST http handler to invoke train pipeline.
+// HandlerPOST http handler to invoke predict pipeline.
 func (p *Processor) HandlerPOST(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		handlers.HandlerError(w, "Method is not supported.", http.StatusMethodNotAllowed)
+		handlers.HandlerError(w, []error{errors.New("Method is not supported")}, http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -36,12 +37,18 @@ func (p *Processor) HandlerPOST(w http.ResponseWriter, r *http.Request) {
 
 	output, err := p.Exec(inputPayload)
 	if err != nil {
-		handlers.HandlerError(w, err.Error(), http.StatusBadRequest)
+		var status int
+		switch eType := (err.(handlers.Error)).Type; eType {
+		case "parsing":
+			status = http.StatusBadRequest
+		case "validation":
+			status = http.StatusUnprocessableEntity
+		}
+		handlers.HandlerError(w, []error{err}, status)
 		return
 	}
 
-	outputPayload := handlers.MustMarshal(output)
 	w.WriteHeader(http.StatusAccepted)
-	w.Write(outputPayload)
+	w.Write(handlers.MustMarshal(output))
 	return
 }

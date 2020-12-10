@@ -21,12 +21,9 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -67,63 +64,6 @@ func TestGetEnv(t *testing.T) {
 		}
 	}
 	os.Unsetenv("TEST_TestGetEnv")
-}
-
-func TestGetRequestPayload(t *testing.T) {
-	type output struct {
-		data []byte
-		err  error
-	}
-
-	tests := []struct {
-		name string
-		in   io.ReadCloser
-		want *output
-	}{
-		{
-			name: "Positive",
-			in:   ioutil.NopCloser(strings.NewReader("test")),
-			want: &output{
-				data: []byte("test"),
-				err:  nil,
-			},
-		},
-	}
-	for _, test := range tests {
-		got := GetRequestPayload(test.in)
-		if !reflect.DeepEqual(got, test.want.data) {
-			t.Fatalf("[%s]: Results don't match\nwant: %v\ngot: %v",
-				test.name, test.want.data, got)
-		}
-	}
-}
-
-func TestGetMustMarshal(t *testing.T) {
-	tests := []struct {
-		name string
-		in   interface{}
-		want []byte
-	}{
-		{
-			name: "Positive",
-			in:   `{"foo": "bar"}`,
-			want: []byte{34, 123, 92, 34, 102, 111, 111, 92, 34, 58, 32, 92, 34, 98, 97, 114, 92, 34, 125, 34},
-		},
-	}
-	for _, test := range tests {
-		got := MustMarshal(test.in)
-
-		if test.name == "Positive" {
-			if !reflect.DeepEqual(got, test.want) {
-				t.Fatalf("[%s]: Results don't match\nwant: %v\ngot: %v",
-					test.name, test.want, got)
-			}
-		} else {
-			if got == nil {
-				t.Fatalf("[%s]: Wrong error implementation", test.name)
-			}
-		}
-	}
 }
 
 func getMockServer() *grpc.ClientConn {
@@ -215,72 +155,6 @@ func TestRunner(t *testing.T) {
 			if err == nil {
 				t.Fatalf("[%s]: Wrong error implementation", test.name)
 			}
-		}
-	}
-}
-
-func TestErrorResponse(t *testing.T) {
-	type args struct {
-		errMsg string
-		status int
-	}
-
-	tests := []struct {
-		in   *args
-		want string
-	}{
-		{
-			in: &args{
-				errMsg: "foobar",
-				status: 404,
-			},
-			want: `{"errors":[{"message":"foobar","pipeline_config":{"data":null,"model":null}}],"submitted_id":[]}`,
-		},
-	}
-
-	for _, test := range tests {
-		w := httptest.NewRecorder()
-		errorResponse(w, test.in.errMsg, test.in.status)
-		got := w.Result()
-		gotStatusCode := got.StatusCode
-
-		if gotStatusCode != test.in.status {
-			t.Fatalf("Results don't match\nwant: %d\ngot: %d", test.in.status, gotStatusCode)
-		}
-
-		body, _ := ioutil.ReadAll(got.Body)
-		gotResp := string(body)
-		if gotResp != test.want {
-			t.Fatalf("Results don't match\nwant: %s\ngot: %s", test.want, gotResp)
-		}
-	}
-}
-
-func TestHandlerStatus(t *testing.T) {
-	tests := []struct {
-		name string
-		in   *http.Request
-		want int
-	}{
-		{
-			name: "Positive",
-			in:   httptest.NewRequest("GET", "http://0.0.0.0:8080", nil),
-			want: http.StatusOK,
-		},
-		{
-			name: "Negative: wrong request type",
-			in:   httptest.NewRequest("POST", "http://0.0.0.0:8080", nil),
-			want: http.StatusMethodNotAllowed,
-		},
-	}
-
-	for _, test := range tests {
-		w := httptest.NewRecorder()
-		handlerStatus(w, test.in)
-		got := w.Result().StatusCode
-		if got != test.want {
-			t.Fatalf("[%s]: Results don't match\nwant: %d\ngot: %d",
-				test.name, test.want, got)
 		}
 	}
 }

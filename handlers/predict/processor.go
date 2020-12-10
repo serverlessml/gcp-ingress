@@ -41,14 +41,14 @@ type Processor struct {
 // Exec run processor sequence.
 func (p *Processor) Exec(data []byte) (*handlers.OutputPayload, error) {
 	errs := handlers.Validate(InputJSONSchema, data)
-	if len(errs) > 0 {
-		return &handlers.OutputPayload{}, fmt.Errorf("validation error: %v", errs)
+	if errs != nil {
+		return &handlers.OutputPayload{}, errs
 	}
 
 	var input Input
 	err := json.Unmarshal(data, &input)
 	if err != nil {
-		return &handlers.OutputPayload{}, fmt.Errorf("faulty payload")
+		return &handlers.OutputPayload{}, handlers.NewUnmarshallerError(err)
 	}
 
 	topic := fmt.Sprintf("%s%s-predict", p.TopicPrefix, input.ProjectID)
@@ -66,22 +66,23 @@ func (p *Processor) Exec(data []byte) (*handlers.OutputPayload, error) {
 		runIDs = append(runIDs, runID)
 	}
 
-	outputErrors := []handlers.ErrorOutput{}
+	pushErrors := []string{}
 	outputRunIDs := []string{}
 	for i, config := range input.Config {
 		err := <-errorsCh
 		if err != nil {
-			outputErrors = append(outputErrors, handlers.ErrorOutput{
-				Message:        err.Error(),
-				PipelineConfig: config,
-			})
+			e := handlers.ErrorPush{
+				Message: err.Error(),
+				Details: config,
+			}
+			pushErrors = append(pushErrors, e.Error())
 		} else {
 			outputRunIDs = append(outputRunIDs, runIDs[i])
 		}
 	}
 
 	return &handlers.OutputPayload{
-		Errors:      outputErrors,
+		Errors:      pushErrors,
 		SubmittedID: outputRunIDs,
 	}, nil
 }

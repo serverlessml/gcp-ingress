@@ -40,13 +40,10 @@ func GetRequestPayload(requestBody io.ReadCloser) []byte {
 }
 
 // HandlerError http error handler.
-func HandlerError(w http.ResponseWriter, errMsg string, status int) {
+func HandlerError(w http.ResponseWriter, errs []error, status int) {
 	w.WriteHeader(status)
 	w.Write(MustMarshal(OutputPayload{
-		Errors: []ErrorOutput{{
-			Message:        errMsg,
-			PipelineConfig: nil,
-		}},
+		Errors:      ErrorArray(errs),
 		SubmittedID: []string{},
 	}))
 	return

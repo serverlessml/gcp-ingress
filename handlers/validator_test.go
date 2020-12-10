@@ -17,38 +17,53 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package train
+package handlers_test
 
 import (
-	"errors"
-	"net/http"
+	"testing"
 
 	"github.com/serverlessml/gcp-ingress/handlers"
 )
 
-// HandlerPOST http handler to invoke train pipeline.
-func (p *Processor) HandlerPOST(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		handlers.HandlerError(w, []error{errors.New("Method is not supported")}, http.StatusMethodNotAllowed)
-		return
+func TestValidator(t *testing.T) {
+	schema := `{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"type": "number", "minimum": 1, "maximum": 2
+	}`
+
+	tests := []struct {
+		name    string
+		in      []byte
+		want    string
+		isError bool
+	}{
+		{
+			name:    "Positive",
+			in:      []byte(`1.1`),
+			want:    "",
+			isError: false,
+		},
+		{
+			name:    "Parsing Error",
+			in:      []byte(`{`),
+			want:    "parsing",
+			isError: true,
+		},
+		{
+			name:    "Validation Error",
+			in:      []byte(`10`),
+			want:    "validation",
+			isError: true,
+		},
 	}
-
-	inputPayload := handlers.GetRequestPayload(r.Body)
-
-	output, err := p.Exec(inputPayload)
-	if err != nil {
-		var status int
-		switch eType := (err.(handlers.Error)).Type; eType {
-		case "parsing":
-			status = http.StatusBadRequest
-		case "validation":
-			status = http.StatusUnprocessableEntity
+	for _, test := range tests {
+		got := handlers.Validate(schema, test.in)
+		eType := ""
+		if test.isError {
+			eType = (got.(handlers.Error)).Type
 		}
-		handlers.HandlerError(w, []error{err}, status)
-		return
+		if eType != test.want {
+			t.Fatalf("[%s]: Wrong error implementation", test.name)
+		}
 	}
-
-	w.WriteHeader(http.StatusAccepted)
-	w.Write(handlers.MustMarshal(output))
-	return
 }

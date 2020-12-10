@@ -6,16 +6,8 @@ type OutputDistribution struct {
 	Topic string
 }
 
-// ErrorOutput defines output error.
-type ErrorOutput struct {
-	// contains error message
-	Message string `json:"message"`
-	// contains pipeline config
-	PipelineConfig interface{} `json:"pipeline_config"`
-}
-
 // OutputPayload defines output payload.
 type OutputPayload struct {
-	Errors      []ErrorOutput `json:"errors"`
-	SubmittedID []string      `json:"submitted_id"`
+	Errors      []string `json:"errors"`
+	SubmittedID []string `json:"submitted_id"`
 }
