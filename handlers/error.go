@@ -20,7 +20,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"fmt"
 )
 
@@ -63,14 +62,4 @@ func ErrorArray(errors []error) []string {
 		e = append(e, err.Error())
 	}
 	return e
-}
-
-// NewUnmarshallerError reads the json unmarshal error.
-func NewUnmarshallerError(unmarshalErr error) error {
-	err := unmarshalErr.(*json.UnmarshalTypeError)
-	return Error{
-		Type:    "parsing",
-		Message: "Input parsing error",
-		Details: fmt.Sprintf("Cannot unmarshal value: %s of type %s", err.Field, err.Type.String()),
-	}
 }

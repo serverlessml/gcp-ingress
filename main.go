@@ -65,8 +65,12 @@ func main() {
 	}
 
 	http.HandleFunc("/status", handlers.HandlerStatus)
-	http.HandleFunc("/train", procTrain.HandlerPOST)
-	http.HandleFunc("/predict", procPredict.HandlerPOST)
+	http.HandleFunc("/train", func(w http.ResponseWriter, r *http.Request) {
+		handlers.HandlerPOST(w, r, procTrain)
+	})
+	http.HandleFunc("/predict", func(w http.ResponseWriter, r *http.Request) {
+		handlers.HandlerPOST(w, r, procPredict)
+	})
 
 	log.Fatalf("ListenAndServe(): %v",
 		http.ListenAndServe(fmt.Sprintf(":%s", GetEnv("PORT", "8080")), nil),

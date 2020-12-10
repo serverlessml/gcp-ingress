@@ -47,10 +47,7 @@ func (p *Processor) Exec(data []byte) (*OutputPayload, error) {
 	}
 
 	var input Input
-	err := json.Unmarshal(data, &input)
-	if err != nil {
-		return nil, NewUnmarshallerError(err)
-	}
+	json.Unmarshal(data, &input)
 
 	errorsCh, runIDs := p.distubuteData(input)
 

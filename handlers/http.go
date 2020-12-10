@@ -61,7 +61,7 @@ func HandlerStatus(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandlerPOST http handler to invoke train pipeline.
-func (p *Processor) HandlerPOST(w http.ResponseWriter, r *http.Request) {
+func HandlerPOST(w http.ResponseWriter, r *http.Request, p *Processor) {
 	if r.Method != "POST" {
 		HandlerError(w, []error{errors.New("Method is not supported")}, http.StatusMethodNotAllowed)
 		return
