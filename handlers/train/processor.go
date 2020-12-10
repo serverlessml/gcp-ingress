@@ -40,15 +40,15 @@ type Processor struct {
 
 // Exec run processor sequence.
 func (p *Processor) Exec(data []byte) (*handlers.OutputPayload, error) {
+	errs := handlers.Validate(InputJSONSchema, data)
+	if len(errs) > 0 {
+		return &handlers.OutputPayload{}, fmt.Errorf("validation error: %v", errs)
+	}
+
 	var input Input
 	err := json.Unmarshal(data, &input)
 	if err != nil {
-		return &handlers.OutputPayload{}, fmt.Errorf("Input reading error: %s", err)
-	}
-
-	err = handlers.ValidateInput(input)
-	if err != nil {
-		return &handlers.OutputPayload{}, fmt.Errorf("Input validation error: %s", err)
+		return &handlers.OutputPayload{}, fmt.Errorf("faulty payload")
 	}
 
 	topic := fmt.Sprintf("%s%s-train", p.TopicPrefix, input.ProjectID)
@@ -58,9 +58,9 @@ func (p *Processor) Exec(data []byte) (*handlers.OutputPayload, error) {
 	for _, config := range input.Config {
 		runID := fmt.Sprintf("%s", uuid.NewV4())
 		payloadPush, _ := json.Marshal(PushPayload{
-			Config:   config,
 			CodeHash: input.CodeHash,
 			RunID:    runID,
+			Config:   config,
 		})
 		go p.Bus.PushRoutine(payloadPush, topic, errorsCh)
 		runIDs = append(runIDs, runID)

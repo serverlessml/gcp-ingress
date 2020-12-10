@@ -30,8 +30,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/serverlessml/gcp-ingress/processor"
-
 	"cloud.google.com/go/pubsub/pstest"
 	"github.com/serverlessml/gcp-ingress/bus"
 	"google.golang.org/api/option"
