@@ -5,7 +5,8 @@ on:
     paths:
       - "!tools/**"
       - "!test_integration.sh"
-      - ".gitignore"
+      - "!.gitignore"
+      - "!Make"
   pull_request:
     branches:
       - master
@@ -19,9 +20,6 @@ name: Deployment
 
 jobs:
   test-n-push:
-
-    if: github.actor == github.event.repository.owner.login
-
     strategy:
       matrix:
         go-version: [1.15.x]
