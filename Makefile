@@ -16,6 +16,8 @@ PROJECT_ID := kedro-01
 TOPIC_PREFIX := trigger_
 BG := -d --name=ingress-gcp-test
 
+test:
+	@go test -tags test -coverprofile="go-cover.tmp" ./...
 
 build:
 	@docker build \
