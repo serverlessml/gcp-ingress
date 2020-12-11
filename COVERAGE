@@ -7,8 +7,8 @@ github.com/serverlessml/gcp-ingress/handlers/error.go:62:	ErrorArray		100.0%
 github.com/serverlessml/gcp-ingress/handlers/http.go:31:	MustMarshal		100.0%
 github.com/serverlessml/gcp-ingress/handlers/http.go:37:	GetRequestPayload	100.0%
 github.com/serverlessml/gcp-ingress/handlers/http.go:44:	HandlerError		100.0%
-github.com/serverlessml/gcp-ingress/handlers/http.go:54:	HandlerStatus		100.0%
-github.com/serverlessml/gcp-ingress/handlers/http.go:64:	HandlerPOST		100.0%
+github.com/serverlessml/gcp-ingress/handlers/http.go:55:	HandlerStatus		100.0%
+github.com/serverlessml/gcp-ingress/handlers/http.go:66:	HandlerPOST		100.0%
 github.com/serverlessml/gcp-ingress/handlers/processor.go:43:	Exec			100.0%
 github.com/serverlessml/gcp-ingress/handlers/processor.go:59:	distubuteData		100.0%
 github.com/serverlessml/gcp-ingress/handlers/processor.go:85:	formatOutput		100.0%

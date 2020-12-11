@@ -11,8 +11,8 @@ repos:
     rev: master
     hooks:
       - id: go-fmt
-      # - id: go-vet
-      # - id: go-unit-tests
+      - id: go-vet
+      - id: go-unit-tests
       - id: go-build
       - id: go-mod-tidy
   - repo: local
@@ -23,9 +23,9 @@ repos:
         always_run: false
         pass_filenames: false
         entry: make license-check
-      # - id: code-coverage-bump
-      #   name: "Code Coverage Bump"
-      #   language: system
-      #   entry: make coverage-bump
-      #   always_run: false
-      #   pass_filenames: false
+      - id: code-coverage-bump
+        name: "Code Coverage Bump"
+        language: system
+        entry: make coverage-bump
+        always_run: false
+        pass_filenames: false
