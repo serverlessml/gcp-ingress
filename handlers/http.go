@@ -42,6 +42,7 @@ func GetRequestPayload(requestBody io.ReadCloser) []byte {
 
 // HandlerError http error handler.
 func HandlerError(w http.ResponseWriter, errs []error, status int) {
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(status)
 	w.Write(MustMarshal(OutputPayload{
 		Errors:      ErrorArray(errs),
@@ -56,6 +57,7 @@ func HandlerStatus(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method is not supported.", http.StatusMethodNotAllowed)
 		return
 	}
+	w.Header().Set("Access-Control-Allow-Methods", "GET")
 	w.WriteHeader(http.StatusOK)
 	return
 }
@@ -82,6 +84,9 @@ func HandlerPOST(w http.ResponseWriter, r *http.Request, p *Processor) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding")
 	w.WriteHeader(http.StatusAccepted)
 	w.Write(MustMarshal(output))
 	return
