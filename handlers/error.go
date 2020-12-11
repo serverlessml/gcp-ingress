@@ -25,8 +25,11 @@ import (
 
 // Error defines the error.
 type Error struct {
-	Type    string
+	// Type defines the error type.
+	Type string
+	// Message defines human readable error message.
 	Message string
+	// Details defines details of the error.
 	Details interface{}
 }
 

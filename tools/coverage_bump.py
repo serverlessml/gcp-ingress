@@ -35,7 +35,7 @@ import utils  # type: ignore
 def run_gocover(path: Path) -> None:
     """Run gocover."""
     utils.execute_cmd(
-        f"""go test -tags test -coverpkg=./... -coverprofile=/tmp/go-cover.tmp ./... > /dev/null
+        f"""go test -tags test -coverprofile=/tmp/go-cover.tmp ./... > /dev/null
 go tool cover -func /tmp/go-cover.tmp -o {path} && rm /tmp/go-cover.tmp"""
     )
 
