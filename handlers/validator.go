@@ -17,36 +17,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package validator
+package handlers
 
 import (
-	"regexp"
-
-	validator "github.com/go-playground/validator/v10"
+	"github.com/xeipuuv/gojsonschema"
 )
 
-// GetValidationErrors outputs validation errors.
-func GetValidationErrors(err error) []string {
-	if err == nil {
-		return []string{}
+// Validate validates byte data against json schema.
+func Validate(schema string, data []byte) error {
+	results, err := gojsonschema.Validate(
+		gojsonschema.NewStringLoader(schema), gojsonschema.NewBytesLoader(data),
+	)
+
+	if err != nil {
+		return Error{
+			Type:    "parsing",
+			Message: "Input parsing error",
+			Details: err,
+		}
 	}
-	var validationErrors []string
-	for _, err := range err.(validator.ValidationErrors) {
-		validationErrors = append(validationErrors, err.Error())
+
+	if len(results.Errors()) == 0 {
+		return nil
 	}
-	return validationErrors
-}
 
-var sha1 = regexp.MustCompile(`^[a-fA-F0-9]{40}$`)
-
-// IsSHA1 check if the input string is a valida SHA1 hash.
-func IsSHA1(fl validator.FieldLevel) bool {
-	return sha1.MatchString(fl.Field().String())
-}
-
-// New is instantiating a validator instance.
-func New() *validator.Validate {
-	Validator := validator.New()
-	Validator.RegisterValidation("sha1", IsSHA1, true)
-	return Validator
+	return Error{
+		Type:    "validation",
+		Message: "The input is invalid.",
+		Details: results.Errors(),
+	}
 }

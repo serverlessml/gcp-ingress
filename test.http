@@ -3,24 +3,54 @@ Accept: application/json
 
 ###
 
-POST http://0.0.0.0:8080/
+POST http://0.0.0.0:8080/train
 Accept: application/json
 
 {
-    "project_id": "0cba82ff-9790-454d-b7b9-22570e7ba28c",
-    "code_hash": "8c2f3d3c5dd853231c7429b099347d13c8bb2c37",
-    "pipeline_config": [{
-            "data": {"foo": 1},
-            "model": {"foo": 1}
+  "project_id": "0cba82ff-9790-454d-b7b9-22570e7ba28c",
+  "code_hash": "8c2f3d3c5dd853231c7429b099347d13c8bb2c37",
+  "pipeline_config": [
+    {
+      "data": {
+        "location": {
+          "source": "gcs://test/train.csv"
         },
-        {
-            "data": {"foo": 2},
-            "model": {"bar": 2}
-        }
-    ]
+        "prep_config": {}
+      },
+      "model": {
+        "hyperparameters": {},
+        "version": "v1"
+      }
+    }
+  ]
 }
 
 ###
 
-GET http://0.0.0.0:8080/
+POST http://0.0.0.0:8080/predict
+Accept: application/json
+
+{
+  "project_id": "0cba82ff-9790-454d-b7b9-22570e7ba28c",
+  "train_id": "8d9f7a7d-14ab-42fc-afe4-e1c3ecfc3524",
+  "pipeline_config": [
+    {
+      "data": {
+        "location": {
+          "source": "gcs://test/test.csv",
+          "destination": "gcs://test/test_output.csv"
+        }
+      }
+    }
+  ]
+}
+
+###
+
+GET http://0.0.0.0:8080/train
+Accept: application/json
+
+###
+
+GET http://0.0.0.0:8080/predict
 Accept: application/json

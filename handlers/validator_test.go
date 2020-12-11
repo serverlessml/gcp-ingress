@@ -17,47 +17,53 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package validator_test
+package handlers_test
 
 import (
-	"reflect"
 	"testing"
 
-	"github.com/serverlessml/gcp-ingress/validator"
+	"github.com/serverlessml/gcp-ingress/handlers"
 )
 
 func TestValidator(t *testing.T) {
-	type testStruct struct {
-		Foo string `validate:"required,sha1"`
-	}
+	schema := `{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"type": "number", "minimum": 1, "maximum": 2
+	}`
 
 	tests := []struct {
-		name string
-		in   testStruct
-		want string
+		name    string
+		in      []byte
+		want    string
+		isError bool
 	}{
 		{
-			name: "Positive",
-			in:   testStruct{Foo: "8c2f3d3c5dd853231c7429b099347d13c8bb2c37"},
-			want: "",
+			name:    "Positive",
+			in:      []byte(`1.1`),
+			want:    "",
+			isError: false,
 		},
 		{
-			name: "Negative",
-			in:   testStruct{Foo: "8c2f3d3c5dd853231c7429b099347d13c8bb2c371"},
-			want: `Key: 'testStruct.Foo' Error:Field validation for 'Foo' failed on the 'sha1' tag`,
+			name:    "Parsing Error",
+			in:      []byte(`{`),
+			want:    "parsing",
+			isError: true,
+		},
+		{
+			name:    "Validation Error",
+			in:      []byte(`10`),
+			want:    "validation",
+			isError: true,
 		},
 	}
-
-	Validator := validator.New()
-
 	for _, test := range tests {
-		t.Run(
-			test.name, func(t *testing.T) {
-				got := Validator.Struct(test.in)
-				if reflect.DeepEqual(validator.GetValidationErrors(got), test.want) {
-					t.Fatalf("[%s]: Results don't match\ngot: %s\nwant: %s",
-						test.name, got, test.want)
-				}
-			})
+		got := handlers.Validate(schema, test.in)
+		eType := ""
+		if test.isError {
+			eType = (got.(handlers.Error)).Type
+		}
+		if eType != test.want {
+			t.Fatalf("[%s]: Wrong error implementation", test.name)
+		}
 	}
 }
