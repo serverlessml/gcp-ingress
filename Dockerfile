@@ -1,9 +1,5 @@
 FROM golang:1.15.3-alpine3.12 AS build
 
-LABEL maintener="Dmitry Kisler"
-LABEL email="admin@dkisler.com"
-LABEL web="www.serverlessml.org"
-
 WORKDIR /go/src
 
 COPY . .
@@ -18,6 +14,10 @@ RUN apk update -q \
     && upx -9 /root/runner
 
 FROM scratch AS run
+
+LABEL maintener="Dmitry Kisler"
+LABEL email="admin@dkisler.com"
+LABEL web="www.serverlessml.org"
 
 # adds x509 cert
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
