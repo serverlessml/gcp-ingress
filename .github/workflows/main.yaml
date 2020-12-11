@@ -2,19 +2,21 @@ on:
   push:
     branches:
       - master
-    paths:
-      - "!tools/**"
-      - "!test_integration.sh"
-      - "!.gitignore"
-      - "!Make"
+    paths-ignore:
+      - "tools/**"
+      - "Makefile"
+      - "test_integration.sh"
+      - "test.http"
+      - "README.md"
+      - "LICENSE*.md"
+      - ".dockerignore"
+      - ".pre-commit-config.yaml"
+      - ".gitignore"
   pull_request:
     branches:
       - master
     types:
       - opened
-
-  watch:
-    types: [started]
 
 name: Deployment
 
