@@ -39,7 +39,7 @@ make PROJECT_ID=<YOUR_GCO_PROJECT_ID> test-run
 
 ### HTTP Response Codes
 |Endpoint|Method|HTTP Status Code|Comment|
-|:-|:-:|-:|--|--|
+|:-|:-:|-:|--|
 |/status|GET|200|-|
 |/status|POST,PUT,PATCH,DELETE|405|Not supported methods|
 |/train<br>/predict|POST|202|Request accepted|
