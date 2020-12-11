@@ -40,7 +40,9 @@ jobs:
         run: make test
 
       - name: Auth with docker hub
-        run: docker login -u {{ secrets.DOCKER_USER }} -p {{ secrets.DOCKER_TOKEN }}
+        run: echo ${TOKEN} | docker login -u {{ secrets.DOCKER_USER }} --password-stdin
+        env:
+          TOKEN: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Build image
         run: make build
