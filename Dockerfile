@@ -13,6 +13,8 @@ RUN apk update -q \
     && CGO_ENABLED=0 GOARCH=386 go build -a -gcflags=all="-l -B -C" -ldflags="-w -s" -o /root/runner *.go \
     && upx -9 /root/runner
 
+RUN echo "executor:x:10001:10001:executor,,,::/bin/false" > /user.txt
+
 FROM scratch AS run
 
 LABEL maintener="Dmitry Kisler"
@@ -21,9 +23,10 @@ LABEL web="www.serverlessml.org"
 
 # adds x509 cert
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=build /user.txt /etc/passwd
+COPY --from=build /root/runner /runner
 
-WORKDIR /root
-COPY --from=build /root/runner .
+USER executor
 
 ENV PORT 8080
 ENV ENVIRONMENT "stage"
