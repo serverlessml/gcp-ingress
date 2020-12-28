@@ -18,6 +18,8 @@ BG := -d --name=ingress-gcp-test
 
 test:
 	@go test -tags test -coverprofile="go-cover.tmp" ./...
+	@go tool cover -func go-cover.tmp
+	@rm go-cover.tmp
 
 build:
 	@docker build \
