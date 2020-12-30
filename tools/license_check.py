@@ -45,9 +45,10 @@ def files_at_path(path: Path) -> List[str]:
     return output
 
 
-def adds_comment_sign(data: str, comment_sign: str) -> str:
+def adds_comment_sign(data: str) -> str:
     """Adds comment signs to the string."""
-    return "\n".join(list(f"{comment_sign} {line}".strip() for line in data.split("\n")[:-1]))
+    data = "\n".join([line for line in data.split("\n")][:-1])
+    return f"/*\n{data}\n*/"
 
 
 def throw_missing_license(header: str, files_list: List[str]) -> None:
@@ -68,7 +69,6 @@ def throw_missing_license(header: str, files_list: List[str]) -> None:
 def main() -> None:
     """Run."""
     header = utils.read(ROOT / PATH_LICENSE_HEADER)
-    header = adds_comment_sign(header, "//")
 
     files_codebase = files_at_path(ROOT)[:1]
 
@@ -76,6 +76,7 @@ def main() -> None:
         ifile for ifile in files_codebase if header not in utils.read(ifile).strip()
     ]
     if files_missing_header:
+        header = adds_comment_sign(header)
         throw_missing_license(header, files_missing_header)
 
 
