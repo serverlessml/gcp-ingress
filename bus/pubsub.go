@@ -52,7 +52,7 @@ func (c *Client) Push(payload []byte, topic string) error {
 	return err
 }
 
-// PushRoutine marshal the output payload object.
+// PushRoutine pushes the message to a topic for async go-routines.
 func (c *Client) PushRoutine(payload []byte, topic string, ch chan error) {
 	err := c.Push(payload, topic)
 	ch <- err
