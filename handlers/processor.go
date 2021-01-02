@@ -21,7 +21,7 @@ import (
 	"fmt"
 
 	uuid "github.com/satori/go.uuid"
-	"github.com/serverlessml/gcp-ingress/bus"
+	bus "github.com/serverlessml/platform/gcp/bus"
 )
 
 // Processor defines processor for predict pipeline.

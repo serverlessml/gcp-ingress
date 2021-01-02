@@ -9,12 +9,13 @@ test-run: build run
 
 .PHONY: build run push
 
+PLATFORM := aws
 REGISTRY := slessml
-SERVICE := ingress-gcp
 VER := `cat VERSION`
+SERVICE := ingress-$(PLATFORM)
 PROJECT_ID := kedro-01
 TOPIC_PREFIX := trigger_
-BG := -d --name=ingress-gcp-test
+BG := -d --name=ingress-test
 
 test:
 	@go test -tags test -coverprofile="go-cover.tmp" ./...
@@ -24,12 +25,13 @@ test:
 build:
 	@docker build \
 		-t ${REGISTRY}/${SERVICE}:${VER} \
+		--build-arg PLATFORM=$(PLATFORM) \
 		-f ./Dockerfile .
 
 push:
 	@docker push ${REGISTRY}/${SERVICE}:${VER}
 
-run:
+run-gcp-local:
 	@docker run $(BG) \
 		-p 8080:8080 \
 		-v ${HOME}/projects/secrets/infra/gcp/key-pubsub.json:/key.json \
@@ -39,7 +41,7 @@ run:
 		-t ${REGISTRY}/${SERVICE}:${VER}
 
 rm:
-	@docker rm -f ingress-gcp-test
+	@docker rm -f ingress-test
 
 test-integration: run
 	@./test_integration.sh

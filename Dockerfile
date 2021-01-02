@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+ARG PLATFORM
 FROM golang:1.15.3-alpine3.12 AS build
 
 WORKDIR /go/src
@@ -23,28 +24,38 @@ RUN apk update -q \
         ca-certificates \
         g++ \
         upx \
-    && update-ca-certificates \
-    && CGO_ENABLED=0 GOARCH=386 go build -a -gcflags=all="-l -B -C" -ldflags="-w -s" -o /root/runner *.go \
-    && upx -9 /root/runner
+        git \
+    && update-ca-certificates
+# && find ./platform -depth -mindepth 1 -maxdepth 1 -type d ! -name ${PLATFORM}
 
-RUN echo "executor:x:10001:10001:executor,,,::/bin/false" > /user.txt
+CMD [ "/bin/sh" ]
 
-FROM scratch AS run
+    # && find bus -type f -not -name bus_${PLATFORM}.go -print0 | xargs -0  -I {} rm -v {} \
+#     && go mod tidy \
+#     && CGO_ENABLED=0 GOARCH=386 go build -a -gcflags=all="-l -B -C" -ldflags="-w -s" -o /root/runner *.go \
+#     && upx -9 --ultra-brute /root/runner
 
-LABEL maintener="Dmitry Kisler"
-LABEL email="admin@dkisler.com"
-LABEL web="www.serverlessml.org"
+# RUN echo "executor:x:10001:10001:executor,,,::/bin/false" > /user.txt
 
-# adds x509 cert
-COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=build /user.txt /etc/passwd
-COPY --from=build /root/runner /runner
+# FROM scratch AS run
 
-USER executor
+# LABEL maintener="Dmitry Kisler"
+# LABEL email="admin@dkisler.com"
+# LABEL web="www.serverlessml.org"
 
-ENV PORT 8080
-ENV ENVIRONMENT "stage"
-ENV PROJECT_ID "project-${ENVIRONMENT}"
-ENV TOPIC_PREFIX "trigger_"
+# # adds x509 cert
+# COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+# COPY --from=build /user.txt /etc/passwd
+# COPY --from=build /root/runner /runner
 
-ENTRYPOINT ["./runner"]
+# USER executor
+
+
+# ENV PROJECT_ID "project"
+# ENV REGION ""
+# ENV TOPIC_PREFIX "trigger_"
+# ENV PORT 8080
+
+# EXPOSE ${PORT}
+
+# ENTRYPOINT ["./runner"]
