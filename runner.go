@@ -21,13 +21,22 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/serverlessml/gcp-ingress/config"
 	"github.com/serverlessml/gcp-ingress/handlers"
 )
 
-// Exec starts main go routine.
-func Exec(busClient interface{}, topicPrefix string) {
+// GetEnv extracts envvar with default value
+func GetEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
+}
+
+// Exec defines main running procedure.
+func Exec(topicPrefix string, busClient handlers.BusClient) {
 	procTrain := &handlers.Processor{
 		Type:            "train",
 		TopicPrefix:     topicPrefix,

@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	uuid "github.com/satori/go.uuid"
-	bus "github.com/serverlessml/platform/gcp/bus"
 )
 
 // Processor defines processor for predict pipeline.
@@ -33,7 +32,7 @@ type Processor struct {
 	// InputJSONSchema defines the jsonschema of the input payload.
 	InputJSONSchema string
 	// Message bus to disctribute messages
-	Bus *bus.Client
+	Bus BusClient
 }
 
 // Exec run processor sequence.
@@ -71,7 +70,7 @@ func (p *Processor) distubuteData(input Input) (chan error, []string) {
 			payload["train_id"] = input.TrainID
 		}
 
-		go p.Bus.PushRoutine(MustMarshal(payload), topic, errorsCh)
+		go PushRoutine(p.Bus, MustMarshal(payload), topic, errorsCh)
 
 		runIDs = append(runIDs, runID)
 	}

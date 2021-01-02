@@ -38,16 +38,16 @@ func mustMarshal(obj interface{}) []byte {
 	return out
 }
 
-var client bus.Client
+var client bus.GCPClient
 var MockServerOptions []option.ClientOption = []option.ClientOption{option.WithGRPCConn(getMockServer())}
 
-func getClient(projectID string, topic string) *bus.Client {
+func getClient(projectID string, topic string) *bus.GCPClient {
 	c := client
 	c.ProjectID = projectID
 	c.Opts = MockServerOptions
 	err := c.Connect()
 	if err != nil {
-		return &bus.Client{}
+		return &bus.GCPClient{}
 	}
 	c.Instance.CreateTopic(c.Ctx, topic)
 	return &c

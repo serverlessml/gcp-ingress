@@ -23,24 +23,22 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sns"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"google.golang.org/api/option"
 )
 
-// Client defines the client to communicate with the message bus.
-type Client struct {
+// AWSClient defines the client to communicate with the SNS.
+type AWSClient struct {
 	// AWS project ID
 	ProjectID string
 	// AWS region
 	Region   string
 	Session  *session.Session
-	Opts     []option.ClientOption
 	Instance *sns.SNS
 }
 
 // getSession establishes the connection session.
-func (c *Client) getSession() error {
+func (c *AWSClient) getSession() error {
 	ses, err := session.NewSession(&aws.Config{
-		Region: aws.String(c.ProjectID),
+		Region: aws.String(c.Region),
 	})
 	if err != nil {
 		return nil
@@ -50,7 +48,7 @@ func (c *Client) getSession() error {
 }
 
 // getIdentity fetches the project ID using AWS STS.
-func (c *Client) getProjectID() error {
+func (c *AWSClient) getProjectID() error {
 	stsClient := sts.New(c.Session)
 	identity, err := stsClient.GetCallerIdentity(nil)
 	if err != nil {
@@ -61,7 +59,7 @@ func (c *Client) getProjectID() error {
 }
 
 // Connect establishes connector to the message broker.
-func (c *Client) Connect() error {
+func (c *AWSClient) Connect() error {
 	err := c.getSession()
 	err = c.getProjectID()
 	c.Instance = sns.New(c.Session)
@@ -69,25 +67,18 @@ func (c *Client) Connect() error {
 }
 
 // getTopicArn fetches the topic ARN based on it's name.
-func (c *Client) topic(topic string) string {
+func (c *AWSClient) topic(topic string) string {
 	return fmt.Sprintf("arn:aws:sns:%s:%s:%s", c.Region, c.ProjectID, topic)
 }
 
 // Push pushes the message to a topic.
-func (c *Client) Push(payload []byte, topic string) error {
+func (c *AWSClient) Push(payload []byte, topic string) error {
 	t := c.topic(topic)
 
 	_, err := c.Instance.Publish(&sns.PublishInput{
-		Message:          aws.String(string(payload)),
-		TopicArn:         &t,
-		MessageStructure: aws.String("json"),
+		Message:  aws.String(string(payload)),
+		TopicArn: &t,
 	})
 
 	return err
-}
-
-// PushRoutine pushes the message to a topic for async go-routines.
-func (c *Client) PushRoutine(payload []byte, topic string, ch chan error) {
-	err := c.Push(payload, topic)
-	ch <- err
 }

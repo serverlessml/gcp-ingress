@@ -1,6 +1,11 @@
-github.com/serverlessml/gcp-ingress/bus/pubsub.go:36:		Connect			100.0%
-github.com/serverlessml/gcp-ingress/bus/pubsub.go:44:		Push			100.0%
-github.com/serverlessml/gcp-ingress/bus/pubsub.go:56:		PushRoutine		100.0%
+github.com/serverlessml/gcp-ingress/bus/aws.go:39:		getSession		0.0%
+github.com/serverlessml/gcp-ingress/bus/aws.go:51:		getProjectID		0.0%
+github.com/serverlessml/gcp-ingress/bus/aws.go:62:		Connect			0.0%
+github.com/serverlessml/gcp-ingress/bus/aws.go:70:		topic			0.0%
+github.com/serverlessml/gcp-ingress/bus/aws.go:75:		Push			0.0%
+github.com/serverlessml/gcp-ingress/bus/gcp.go:36:		Connect			100.0%
+github.com/serverlessml/gcp-ingress/bus/gcp.go:44:		Push			100.0%
+github.com/serverlessml/gcp-ingress/handlers/bus.go:58:		PushRoutine		100.0%
 github.com/serverlessml/gcp-ingress/handlers/error.go:34:	Error			100.0%
 github.com/serverlessml/gcp-ingress/handlers/error.go:51:	Error			100.0%
 github.com/serverlessml/gcp-ingress/handlers/error.go:59:	ErrorArray		100.0%
@@ -9,8 +14,8 @@ github.com/serverlessml/gcp-ingress/handlers/http.go:34:	GetRequestPayload	100.0
 github.com/serverlessml/gcp-ingress/handlers/http.go:41:	HandlerError		100.0%
 github.com/serverlessml/gcp-ingress/handlers/http.go:52:	HandlerStatus		100.0%
 github.com/serverlessml/gcp-ingress/handlers/http.go:63:	HandlerPOST		100.0%
-github.com/serverlessml/gcp-ingress/handlers/processor.go:40:	Exec			100.0%
-github.com/serverlessml/gcp-ingress/handlers/processor.go:56:	distubuteData		100.0%
-github.com/serverlessml/gcp-ingress/handlers/processor.go:82:	formatOutput		100.0%
+github.com/serverlessml/gcp-ingress/handlers/processor.go:39:	Exec			100.0%
+github.com/serverlessml/gcp-ingress/handlers/processor.go:55:	distubuteData		100.0%
+github.com/serverlessml/gcp-ingress/handlers/processor.go:81:	formatOutput		100.0%
 github.com/serverlessml/gcp-ingress/handlers/validator.go:24:	Validate		100.0%
-total:								(statements)		100.0%
+total:								(statements)		82.4%

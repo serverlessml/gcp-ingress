@@ -20,12 +20,12 @@ import (
 	"testing"
 
 	"cloud.google.com/go/pubsub/pstest"
-	bus "github.com/serverlessml/gcp-ingress/platform/gcp/bus"
+	bus "github.com/serverlessml/gcp-ingress/bus"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 )
 
-var client bus.Client
+var client bus.GCPClient
 
 func getMockServer() *grpc.ClientConn {
 	srv := pstest.NewServer()
@@ -35,13 +35,13 @@ func getMockServer() *grpc.ClientConn {
 
 var MockServerOptions []option.ClientOption = []option.ClientOption{option.WithGRPCConn(getMockServer())}
 
-func getClient() (bus.Client, error) {
+func getClient() (bus.GCPClient, error) {
 	c := client
 	c.ProjectID = "test"
 	c.Opts = MockServerOptions
 	err := c.Connect()
 	if err != nil {
-		return bus.Client{}, err
+		return bus.GCPClient{}, err
 	}
 	c.Instance.CreateTopic(c.Ctx, "foo")
 	return c, nil
@@ -101,44 +101,6 @@ func TestPush(t *testing.T) {
 			}
 		} else {
 			if err == nil {
-				t.Fatalf("[%s]: Error wasn't thrown.", test.name)
-			}
-		}
-	}
-}
-
-func TestPushRoutine(t *testing.T) {
-	c, _ := getClient()
-	defer c.Instance.Close()
-
-	tests := []struct {
-		name    string
-		in      *input
-		want    error
-		isError bool
-	}{
-		{
-			name: "Positive",
-			in: &input{
-				Payload: []byte{1},
-				Topic:   "foo",
-				Ch:      make(chan error, 1),
-			},
-			want:    nil,
-			isError: false,
-		},
-	}
-
-	for _, test := range tests {
-		c.PushRoutine(test.in.Payload, test.in.Topic, test.in.Ch)
-		got := <-test.in.Ch
-		if !test.isError {
-			if got != test.want {
-				t.Fatalf("[%s]: Results don't match\nwant: %s\ngot: %s",
-					test.name, test.want, got)
-			}
-		} else {
-			if got == nil {
 				t.Fatalf("[%s]: Error wasn't thrown.", test.name)
 			}
 		}

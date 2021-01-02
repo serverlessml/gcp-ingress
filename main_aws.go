@@ -19,32 +19,16 @@ package main
 
 import (
 	"log"
-	"os"
 
-	"github.com/serverlessml/gcp-ingress/platform/aws/bus"
+	"github.com/serverlessml/gcp-ingress/bus"
 )
 
-// GetEnv extracts envvar with default value
-func GetEnv(key, fallback string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
-	}
-	return fallback
-}
-
 func main() {
-	// project ID
-	projectID := GetEnv("PROJECT_ID", "project")
-	// env cloud region
-	region := GetEnv("REGION", "")
-	// bus topic to push to
-	topicPrefix := GetEnv("TOPIC_PREFIX", "trigger_")
-
-	busClient := &bus.Client{ProjectID: projectID, Region: region}
+	busClient := bus.AWSClient{Region: GetEnv("REGION", "")}
 	err := busClient.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	Exec(busClient, topicPrefix)
+	Exec(GetEnv("TOPIC_PREFIX", "trigger_"), &busClient)
 }
