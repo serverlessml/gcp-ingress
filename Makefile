@@ -17,11 +17,19 @@ REGION := eu-west-1
 PROJECT_ID := kedro-01
 TOPIC_PREFIX := trigger_
 BG := -d --name=ingress-test
+TEMP_DIR := /tmp/temp-ingress
+
 
 test:
-	@go test -tags test -coverprofile="go-cover.tmp" ./...
-	@go tool cover -func go-cover.tmp
-	@rm go-cover.tmp
+	@ mkdir -p ${TEMP_DIR}/bus
+	@ cp -r handlers config ${TEMP_DIR}
+	@ cp bus/${PLATFORM}*.go ${TEMP_DIR}/bus/
+	@ cp runner.go go.* ${TEMP_DIR}/
+	@ cp main_${PLATFORM}.go ${TEMP_DIR}/main.go
+	@ cd ${TEMP_DIR} \
+	&& go test -tags test -coverprofile="go-cover.tmp" ./... \
+	&& go tool cover -func go-cover.tmp
+	@ rm -r ${TEMP_DIR}
 
 build:
 	@docker build \

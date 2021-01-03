@@ -11,12 +11,24 @@ repos:
     rev: master
     hooks:
       - id: go-fmt
-      - id: go-vet
+      # - id: go-vet
       # - id: go-unit-tests
       # - id: go-build
       # - id: go-mod-tidy
   - repo: local
     hooks:
+      - id: test-aws
+        name: "Test AWS"
+        language: system
+        always_run: false
+        pass_filenames: false
+        entry: make test PLATFORM=aws
+      - id: test-gcp
+        name: "Test GCP"
+        language: system
+        always_run: false
+        pass_filenames: false
+        entry: make test PLATFORM=gcp
       - id: license
         name: "Licence check"
         language: system

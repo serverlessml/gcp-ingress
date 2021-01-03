@@ -23,8 +23,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/serverlessml/gcp-ingress/config"
-	"github.com/serverlessml/gcp-ingress/handlers"
+	"github.com/serverlessml/ingress/config"
+	"github.com/serverlessml/ingress/handlers"
 )
 
 // GetEnv extracts envvar with default value

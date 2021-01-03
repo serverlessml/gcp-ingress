@@ -19,7 +19,7 @@ package handlers_test
 import (
 	"testing"
 
-	bus "github.com/serverlessml/gcp-ingress/handlers"
+	bus "github.com/serverlessml/ingress/handlers"
 )
 
 type inputPush struct {

@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"cloud.google.com/go/pubsub/pstest"
-	bus "github.com/serverlessml/gcp-ingress/bus"
+	bus "github.com/serverlessml/ingress/bus"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 )

@@ -20,7 +20,7 @@ package main
 import (
 	"log"
 
-	"github.com/serverlessml/gcp-ingress/bus"
+	"github.com/serverlessml/ingress/bus"
 )
 
 func main() {
