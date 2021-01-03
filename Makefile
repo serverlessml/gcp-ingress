@@ -39,16 +39,17 @@ run-gcp-local:
 		-e GOOGLE_APPLICATION_CREDENTIALS=/key.json \
 		-e PROJECT_ID=${PROJECT_ID} \
 		-e TOPIC_PREFIX=${TOPIC_PREFIX} \
-		-t ${REGISTRY}/${SERVICE}:${VER}
+		-t ${REGISTRY}/ingress-gcp:${VER}
 
 run-aws-local:
 	@docker run $(BG) \
 		-p 8080:8080 \
 		-e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
 		-e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+		-e AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
 		-e TOPIC_PREFIX=${TOPIC_PREFIX} \
 		-e REGION=${REGION} \
-		-t ${REGISTRY}/${SERVICE}:${VER}
+		-t ${REGISTRY}/ingress-aws:${VER}
 
 rm:
 	@docker rm -f ingress-test
