@@ -25,8 +25,8 @@ jobs:
     strategy:
       matrix:
         go-version: [1.15.x]
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+        platform: [aws, gcp]
+    runs-on: ubuntu-latest
     steps:
       - name: Install Go
         uses: actions/setup-go@v2
@@ -37,7 +37,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Test
-        run: make test
+        run: make test PLATFORM=${{matrix.platform}}
 
       - name: Auth with docker hub
         run: echo "${DOCKER_TOKEN}" | docker login -u "${DOCKER_USER}" --password-stdin
@@ -46,7 +46,9 @@ jobs:
           DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Build image
-        run: make build
+        run: make build PLATFORM=${{matrix.platform}}
 
       - name: Push image to the repo
-        run: make push
+        run: |
+          make push PLATFORM=${{matrix.platform}}
+          make push-latest PLATFORM=${{matrix.platform}}

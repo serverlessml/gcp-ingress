@@ -40,6 +40,10 @@ build:
 push:
 	@docker push ${REGISTRY}/${SERVICE}:${VER}
 
+push-latest:
+	@docker tag ${REGISTRY}/${SERVICE}:${VER} ${REGISTRY}/${SERVICE}:latest
+	@docker push ${REGISTRY}/${SERVICE}:latest
+
 run-gcp-local:
 	@docker run $(BG) \
 		-p 8080:8080 \
