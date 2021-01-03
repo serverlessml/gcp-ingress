@@ -60,10 +60,15 @@ func (c *AWSClient) getProjectID() error {
 
 // Connect establishes connector to the message broker.
 func (c *AWSClient) Connect() error {
-	err := c.getSession()
-	err = c.getProjectID()
+	if err := c.getSession(); err != nil {
+		return err
+	}
+	if err := c.getProjectID(); err != nil {
+		return err
+	}
+
 	c.Instance = sns.New(c.Session)
-	return err
+	return nil
 }
 
 // getTopicArn fetches the topic ARN based on it's name.
