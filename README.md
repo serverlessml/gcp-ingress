@@ -2,7 +2,7 @@
 
 ||
 |-|
-|[![Go Report Card](https://goreportcard.com/badge/github.com/serverlessml/gcp-ingress)](https://goreportcard.com/report/github.com/serverlessml/gcp-ingress)|
+|[![Go Report Card](https://goreportcard.com/badge/github.com/serverlessml/ingress)](https://goreportcard.com/report/github.com/serverlessml/ingress)|
 |[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5f25b1430ecb41298f67750e25777169)](https://app.codacy.com/gh/serverlessml/gcp-ingress?utm_source=github.com&utm_medium=referral&utm_content=serverlessml/gcp-ingress&utm_campaign=Badge_Grade)|
 |[![code coverage:aws](https://img.shields.io/badge/coverage%20aws-80%25-yellowgreen)](https://img.shields.io/badge/coverage%20aws-80%25-yellowgreen)|
 |[![code coverage:gcp](https://img.shields.io/badge/coverage%20gcp-100%25-brightgreen)](https://img.shields.io/badge/coverage%20gcp-100%25-brightgreen)|
