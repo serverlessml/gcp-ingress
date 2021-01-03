@@ -11,21 +11,39 @@ repos:
     rev: master
     hooks:
       - id: go-fmt
-      - id: go-vet
-      - id: go-unit-tests
-      - id: go-build
-      - id: go-mod-tidy
+      # - id: go-vet
+      # - id: go-unit-tests
+      # - id: go-build
+      # - id: go-mod-tidy
   - repo: local
     hooks:
+      - id: test-aws
+        name: "Test AWS"
+        language: system
+        always_run: false
+        pass_filenames: false
+        entry: make test PLATFORM=aws
+      - id: test-gcp
+        name: "Test GCP"
+        language: system
+        always_run: false
+        pass_filenames: false
+        entry: make test PLATFORM=gcp
       - id: license
         name: "Licence check"
         language: system
         always_run: false
         pass_filenames: false
         entry: make license-check
-      - id: code-coverage-bump
-        name: "Code Coverage Bump"
+      - id: code-coverage-bump-aws
+        name: "Code Coverage Bump AWS"
         language: system
-        entry: make coverage-bump
+        entry: make coverage-bump PLATFORM=aws
+        always_run: false
+        pass_filenames: false
+      - id: code-coverage-bump-aws
+        name: "Code Coverage Bump GCP"
+        language: system
+        entry: make coverage-bump PLATFORM=gcp
         always_run: false
         pass_filenames: false

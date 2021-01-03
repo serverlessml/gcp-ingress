@@ -1,21 +1,18 @@
-// Copyright 2020 dkisler.com Dmitry Kisler
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-// NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-// BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-// ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-//
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+Copyright © 2020 Dmitry Kisler <admin@dkisler.com>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 
 package handlers_test
 
@@ -25,12 +22,8 @@ import (
 	"reflect"
 	"testing"
 
-	"cloud.google.com/go/pubsub/pstest"
-	"github.com/serverlessml/gcp-ingress/bus"
-	"github.com/serverlessml/gcp-ingress/config"
-	"github.com/serverlessml/gcp-ingress/handlers"
-	"google.golang.org/api/option"
-	"google.golang.org/grpc"
+	"github.com/serverlessml/ingress/config"
+	"github.com/serverlessml/ingress/handlers"
 )
 
 func mustMarshal(obj interface{}) []byte {
@@ -41,25 +34,23 @@ func mustMarshal(obj interface{}) []byte {
 	return out
 }
 
-var client bus.Client
-var MockServerOptions []option.ClientOption = []option.ClientOption{option.WithGRPCConn(getMockServer())}
-
-func getClient(projectID string, topic string) *bus.Client {
-	c := client
-	c.ProjectID = projectID
-	c.Opts = MockServerOptions
-	err := c.Connect()
-	if err != nil {
-		return &bus.Client{}
-	}
-	c.Instance.CreateTopic(c.Ctx, topic)
-	return &c
+type mockBusClient struct {
+	handlers.BusClient
 }
 
-func getMockServer() *grpc.ClientConn {
-	srv := pstest.NewServer()
-	conn, _ := grpc.Dial(srv.Addr, grpc.WithInsecure())
-	return conn
+func (m *mockBusClient) Connect() error {
+	return nil
+}
+
+func (m *mockBusClient) Push(payload []byte, topic string) error {
+	if topic == "trigger_48719f69-6e3d-4ec9-a876-b8777cda74f9-predict" {
+		return fmt.Errorf(`rpc error: code = NotFound desc = topic "projects/0cba82ff-9790-454d-b7b9-22570e7ba28c/topics/trigger_48719f69-6e3d-4ec9-a876-b8777cda74f9-predict". Details:nmap[data:map[location:map[destination:gcs://test/test1.csv source:gcs://test/test.csv]]]`)
+	}
+	return nil
+}
+
+func getClient(projectID string, topic string) *mockBusClient {
+	return &mockBusClient{}
 }
 
 const (

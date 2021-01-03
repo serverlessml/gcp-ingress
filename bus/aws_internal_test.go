@@ -14,33 +14,37 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package handlers
+package bus
 
 import (
-	"github.com/xeipuuv/gojsonschema"
+	"testing"
 )
 
-// Validate validates byte data against json schema.
-func Validate(schema string, data []byte) error {
-	results, err := gojsonschema.Validate(
-		gojsonschema.NewStringLoader(schema), gojsonschema.NewBytesLoader(data),
-	)
+func TestTopic(t *testing.T) {
+	type inpt struct {
+		Region  string
+		Project string
+		Topic   string
+	}
+	tests := []struct {
+		in   *inpt
+		want string
+	}{
+		{
+			in: &inpt{
+				Region:  "eu-west-1",
+				Project: "111111",
+				Topic:   "foo",
+			},
+			want: "arn:aws:sns:eu-west-1:111111:foo",
+		},
+	}
 
-	if err != nil {
-		return Error{
-			Type:    "parsing",
-			Message: "Input parsing error",
-			Details: err,
+	for _, test := range tests {
+		c := &AWSClient{Region: test.in.Region, ProjectID: test.in.Project}
+		got := c.getTopicArn(test.in.Topic)
+		if got != test.want {
+			t.Fatalf("Results don't match\nwant: %s\ngot: %s", test.want, test.in)
 		}
-	}
-
-	if len(results.Errors()) == 0 {
-		return nil
-	}
-
-	return Error{
-		Type:    "validation",
-		Message: "The input is invalid.",
-		Details: results.Errors(),
 	}
 }

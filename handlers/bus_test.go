@@ -19,48 +19,48 @@ package handlers_test
 import (
 	"testing"
 
-	"github.com/serverlessml/ingress/handlers"
+	bus "github.com/serverlessml/ingress/handlers"
 )
 
-func TestValidator(t *testing.T) {
-	schema := `{
-	"$schema": "http://json-schema.org/draft-07/schema#",
-	"type": "number", "minimum": 1, "maximum": 2
-	}`
+type inputPush struct {
+	Payload []byte
+	Topic   string
+	Ch      chan error
+}
+
+func TestPushRoutine(t *testing.T) {
+	c := getClient("test", "foo")
 
 	tests := []struct {
 		name    string
-		in      []byte
-		want    string
+		in      *inputPush
+		want    error
 		isError bool
 	}{
 		{
-			name:    "Positive",
-			in:      []byte(`1.1`),
-			want:    "",
+			name: "Positive",
+			in: &inputPush{
+				Payload: []byte{1},
+				Topic:   "foo",
+				Ch:      make(chan error, 1),
+			},
+			want:    nil,
 			isError: false,
 		},
-		{
-			name:    "Parsing Error",
-			in:      []byte(`{`),
-			want:    "parsing",
-			isError: true,
-		},
-		{
-			name:    "Validation Error",
-			in:      []byte(`10`),
-			want:    "validation",
-			isError: true,
-		},
 	}
+
 	for _, test := range tests {
-		got := handlers.Validate(schema, test.in)
-		eType := ""
-		if test.isError {
-			eType = (got.(handlers.Error)).Type
-		}
-		if eType != test.want {
-			t.Fatalf("[%s]: Wrong error implementation", test.name)
+		bus.PushRoutine(c, test.in.Payload, test.in.Topic, test.in.Ch)
+		got := <-test.in.Ch
+		if !test.isError {
+			if got != test.want {
+				t.Fatalf("[%s]: Results don't match\nwant: %s\ngot: %s",
+					test.name, test.want, got)
+			}
+		} else {
+			if got == nil {
+				t.Fatalf("[%s]: Error wasn't thrown.", test.name)
+			}
 		}
 	}
 }
