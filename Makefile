@@ -13,6 +13,7 @@ PLATFORM := aws
 REGISTRY := slessml
 VER := `cat VERSION`
 SERVICE := ingress-$(PLATFORM)
+REGION := eu-west-1
 PROJECT_ID := kedro-01
 TOPIC_PREFIX := trigger_
 BG := -d --name=ingress-test
@@ -25,7 +26,7 @@ test:
 build:
 	@docker build \
 		-t ${REGISTRY}/${SERVICE}:${VER} \
-		--build-arg PLATFORM=$(PLATFORM) \
+		--build-arg PLATFORM=${PLATFORM} \
 		-f ./Dockerfile .
 
 push:
@@ -40,6 +41,15 @@ run-gcp-local:
 		-e TOPIC_PREFIX=${TOPIC_PREFIX} \
 		-t ${REGISTRY}/${SERVICE}:${VER}
 
+run-aws-local:
+	@docker run $(BG) \
+		-p 8080:8080 \
+		-e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+		-e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+		-e TOPIC_PREFIX=${TOPIC_PREFIX} \
+		-e REGION=${REGION} \
+		-t ${REGISTRY}/${SERVICE}:${VER}
+
 rm:
 	@docker rm -f ingress-test
 
@@ -47,7 +57,7 @@ test-integration: run
 	@./test_integration.sh
 
 coverage-bump:
-	@./tools/coverage_bump.py
+	@./tools/coverage_bump.py --platform ${PLATFORM}
 
 license-check:
 	@./tools/license_check.py

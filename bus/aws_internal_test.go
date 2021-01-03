@@ -14,16 +14,37 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package handlers
+package bus
 
-// BusClient defines the client to push message to message bus.
-type BusClient interface {
-	Connect() error
-	Push([]byte, string) error
-}
+import (
+	"testing"
+)
 
-// PushRoutine pushes the message to a topic for async go-routines.
-func PushRoutine(c BusClient, payload []byte, topic string, ch chan error) {
-	err := c.Push(payload, topic)
-	ch <- err
+func TestTopic(t *testing.T) {
+	type inpt struct {
+		Region  string
+		Project string
+		Topic   string
+	}
+	tests := []struct {
+		in   *inpt
+		want string
+	}{
+		{
+			in: &inpt{
+				Region:  "eu-west-1",
+				Project: "111111",
+				Topic:   "foo",
+			},
+			want: "arn:aws:sns:eu-west-1:111111:foo",
+		},
+	}
+
+	for _, test := range tests {
+		c := &AWSClient{Region: test.in.Region, ProjectID: test.in.Project}
+		got := c.getTopicArn(test.in.Topic)
+		if got != test.want {
+			t.Fatalf("Results don't match\nwant: %s\ngot: %s", test.want, test.in)
+		}
+	}
 }

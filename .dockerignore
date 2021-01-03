@@ -13,5 +13,5 @@ Dockerfile
 .dockerignore
 Makefile
 VERSION
-COVERAGE
+COVERAGE*
 tools

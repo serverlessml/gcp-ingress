@@ -67,13 +67,13 @@ func (c *AWSClient) Connect() error {
 }
 
 // getTopicArn fetches the topic ARN based on it's name.
-func (c *AWSClient) topic(topic string) string {
+func (c *AWSClient) getTopicArn(topic string) string {
 	return fmt.Sprintf("arn:aws:sns:%s:%s:%s", c.Region, c.ProjectID, topic)
 }
 
 // Push pushes the message to a topic.
 func (c *AWSClient) Push(payload []byte, topic string) error {
-	t := c.topic(topic)
+	t := c.getTopicArn(topic)
 
 	_, err := c.Instance.Publish(&sns.PublishInput{
 		Message:  aws.String(string(payload)),
