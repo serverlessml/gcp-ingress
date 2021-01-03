@@ -22,12 +22,8 @@ import (
 	"reflect"
 	"testing"
 
-	"cloud.google.com/go/pubsub/pstest"
-	"github.com/serverlessml/gcp-ingress/bus"
 	"github.com/serverlessml/gcp-ingress/config"
 	"github.com/serverlessml/gcp-ingress/handlers"
-	"google.golang.org/api/option"
-	"google.golang.org/grpc"
 )
 
 func mustMarshal(obj interface{}) []byte {
@@ -38,25 +34,23 @@ func mustMarshal(obj interface{}) []byte {
 	return out
 }
 
-var client bus.GCPClient
-var MockServerOptions []option.ClientOption = []option.ClientOption{option.WithGRPCConn(getMockServer())}
-
-func getClient(projectID string, topic string) *bus.GCPClient {
-	c := client
-	c.ProjectID = projectID
-	c.Opts = MockServerOptions
-	err := c.Connect()
-	if err != nil {
-		return &bus.GCPClient{}
-	}
-	c.Instance.CreateTopic(c.Ctx, topic)
-	return &c
+type mockBusClient struct {
+	handlers.BusClient
 }
 
-func getMockServer() *grpc.ClientConn {
-	srv := pstest.NewServer()
-	conn, _ := grpc.Dial(srv.Addr, grpc.WithInsecure())
-	return conn
+func (m *mockBusClient) Connect() error {
+	return nil
+}
+
+func (m *mockBusClient) Push(payload []byte, topic string) error {
+	if topic == "trigger_48719f69-6e3d-4ec9-a876-b8777cda74f9-predict" {
+		return fmt.Errorf(`rpc error: code = NotFound desc = topic "projects/0cba82ff-9790-454d-b7b9-22570e7ba28c/topics/trigger_48719f69-6e3d-4ec9-a876-b8777cda74f9-predict". Details:nmap[data:map[location:map[destination:gcs://test/test1.csv source:gcs://test/test.csv]]]`)
+	}
+	return nil
+}
+
+func getClient(projectID string, topic string) *mockBusClient {
+	return &mockBusClient{}
 }
 
 const (
