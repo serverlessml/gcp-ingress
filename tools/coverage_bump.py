@@ -24,9 +24,8 @@
 https://shields.io/ is used to generate badges
 """
 
-import logging
 import argparse
-import os
+import logging
 import re
 from pathlib import Path
 
@@ -83,7 +82,8 @@ def generate_url(coverage_pct: float, platform: str) -> str:
 
 
 def main(platform: str) -> None:
-    """Run.
+    """
+    Run.
 
     Args:
         platform: Infra env AWS, or GCP.
