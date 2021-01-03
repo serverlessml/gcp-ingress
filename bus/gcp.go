@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+// +build !aws
 
 package bus
 
@@ -23,8 +24,8 @@ import (
 	"google.golang.org/api/option"
 )
 
-// Client defines the client to communicate with the message bus.
-type Client struct {
+// GCPClient defines the client to communicate with pubsub.
+type GCPClient struct {
 	// GCP Project ID
 	ProjectID string
 	Ctx       context.Context
@@ -33,7 +34,7 @@ type Client struct {
 }
 
 // Connect establishes connector to the message broker.
-func (c *Client) Connect() error {
+func (c *GCPClient) Connect() error {
 	var err error
 	c.Ctx = context.Background()
 	c.Instance, err = pubsub.NewClient(c.Ctx, c.ProjectID, c.Opts...)
@@ -41,7 +42,7 @@ func (c *Client) Connect() error {
 }
 
 // Push pushes the message to a topic.
-func (c *Client) Push(payload []byte, topic string) error {
+func (c *GCPClient) Push(payload []byte, topic string) error {
 	t := c.Instance.Topic(topic)
 	t.PublishSettings.NumGoroutines = 1
 
@@ -50,10 +51,4 @@ func (c *Client) Push(payload []byte, topic string) error {
 	// ID is returned for the published message.
 	_, err := result.Get(c.Ctx)
 	return err
-}
-
-// PushRoutine pushes the message to a topic for async go-routines.
-func (c *Client) PushRoutine(payload []byte, topic string, ch chan error) {
-	err := c.Push(payload, topic)
-	ch <- err
 }

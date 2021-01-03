@@ -23,9 +23,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/serverlessml/gcp-ingress/bus"
-	"github.com/serverlessml/gcp-ingress/config"
-	"github.com/serverlessml/gcp-ingress/handlers"
+	"github.com/serverlessml/ingress/config"
+	"github.com/serverlessml/ingress/handlers"
 )
 
 // GetEnv extracts envvar with default value
@@ -36,28 +35,20 @@ func GetEnv(key, fallback string) string {
 	return fallback
 }
 
-func main() {
-	projectID := GetEnv("PROJECT_ID", "project")
-	topicPrefix := GetEnv("TOPIC_PREFIX", "trigger_")
-
-	pubsubClient := &bus.Client{ProjectID: projectID}
-	err := pubsubClient.Connect()
-	if err != nil {
-		log.Fatal(err)
-	}
-
+// Exec defines main running procedure.
+func Exec(topicPrefix string, busClient handlers.BusClient) {
 	procTrain := &handlers.Processor{
 		Type:            "train",
 		TopicPrefix:     topicPrefix,
 		InputJSONSchema: config.InputJSONSchemaTrain,
-		Bus:             pubsubClient,
+		Bus:             busClient,
 	}
 
 	procPredict := &handlers.Processor{
 		Type:            "predict",
 		TopicPrefix:     topicPrefix,
 		InputJSONSchema: config.InputJSONSchemaPredict,
-		Bus:             pubsubClient,
+		Bus:             busClient,
 	}
 
 	http.HandleFunc("/status", handlers.HandlerStatus)

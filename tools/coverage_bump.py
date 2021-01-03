@@ -25,6 +25,7 @@ https://shields.io/ is used to generate badges
 """
 
 import logging
+import argparse
 import os
 import re
 from pathlib import Path
@@ -32,12 +33,30 @@ from pathlib import Path
 import utils  # type: ignore
 
 
-def run_gocover(path: Path) -> None:
-    """Run gocover."""
-    utils.execute_cmd(
-        f"""go test -tags test -coverprofile=/tmp/go-cover.tmp ./... > /dev/null
-go tool cover -func /tmp/go-cover.tmp -o {path} && rm /tmp/go-cover.tmp"""
+def get_args() -> argparse.Namespace:
+    """Parse input arguments."""
+    parser = argparse.ArgumentParser("Cover test coverage assessment.")
+    parser.add_argument(
+        "--platform", "-p", help="Env platform, i.e. aws, or gcp.", required=True, type=str
     )
+    args = parser.parse_args()
+    return args
+
+
+def run_gocover(path: Path, platform: str) -> None:
+    """Run gocover."""
+    cmd = f"""export TEMP_DIR=/tmp/temp-ingress \
+&& mkdir -p $TEMP_DIR/bus \
+&& cp -r handlers config $TEMP_DIR \
+&& cp bus/{platform}*.go $TEMP_DIR/bus/ \
+&& cp main_{platform}.go runner.go go.* $TEMP_DIR/ \
+&& cd $TEMP_DIR \
+&& go mod tidy \
+&& go test -tags test -coverprofile=$TEMP_DIR/go-cover.tmp ./... > /dev/null \
+&& go tool cover -func $TEMP_DIR/go-cover.tmp -o {path} \
+&& cd /tmp && rm -r $TEMP_DIR"""
+
+    utils.execute_cmd(cmd)
 
 
 def extract_total_coverage(raw: str) -> int:
@@ -46,7 +65,7 @@ def extract_total_coverage(raw: str) -> int:
     return int(float(tail_line.split("\t")[-1][:-1]))
 
 
-def generate_url(coverage_pct: float) -> str:
+def generate_url(coverage_pct: float, platform: str) -> str:
     """Generate badge source URL."""
     color = "yellow"
     if coverage_pct == 100:
@@ -60,24 +79,28 @@ def generate_url(coverage_pct: float) -> str:
     else:
         color = "orange"
 
-    return f"https://img.shields.io/badge/coverage-{coverage_pct}%25-{color}"
+    return f"https://img.shields.io/badge/coverage%20{platform}-{coverage_pct}%25-{color}"
 
 
-def main() -> None:
-    """Run."""
+def main(platform: str) -> None:
+    """Run.
+
+    Args:
+        platform: Infra env AWS, or GCP.
+    """
     root = Path(__file__).absolute().parents[1]
     path_readme = root / "README.md"
-    path_coverage = root / "COVERAGE"
-    placeholder_tag = "Code Coverage"
+    path_coverage = root / f"COVERAGE.{platform}"
+    placeholder_tag = f"code coverage:{platform}"
     regexp_pattern = rf"\[\!\[{placeholder_tag}\]\(.*\)\]\(.*\)"
 
-    run_gocover(path_coverage)
+    run_gocover(path_coverage, platform)
 
     coverage = utils.read(path_coverage)
 
     coverage_pct = extract_total_coverage(coverage)
 
-    badge_url = generate_url(coverage_pct)
+    badge_url = generate_url(coverage_pct, platform)
 
     inpt = utils.read(path_readme)
 
@@ -96,7 +119,9 @@ def main() -> None:
 if __name__ == "__main__":
     log = logging.getLogger("coverage-bump")
 
+    args = get_args()
+
     try:
-        main()
+        main(args.platform)
     except Exception as ex:  # pylint: disable=broad-except
         log.error(ex)

@@ -19,7 +19,7 @@ package handlers_test
 import (
 	"testing"
 
-	"github.com/serverlessml/gcp-ingress/handlers"
+	"github.com/serverlessml/ingress/handlers"
 )
 
 func TestError(t *testing.T) {

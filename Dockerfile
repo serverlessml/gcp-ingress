@@ -18,12 +18,19 @@ WORKDIR /go/src
 
 COPY . .
 
+ARG PLATFORM
+
 RUN apk update -q \
     && apk add --no-cache -q \
         ca-certificates \
         g++ \
         upx \
+        git \
     && update-ca-certificates \
+    && cd ./bus && ls | grep -v ${PLATFORM}*.go | xargs rm -f {} \
+    && cd ../ && ls | grep main_ | grep -v ${PLATFORM}.go | xargs rm -f {} \
+    && mv main_${PLATFORM}.go main.go \
+    && go mod tidy \
     && CGO_ENABLED=0 GOARCH=386 go build -a -gcflags=all="-l -B -C" -ldflags="-w -s" -o /root/runner *.go \
     && upx -9 /root/runner
 
@@ -42,9 +49,11 @@ COPY --from=build /root/runner /runner
 
 USER executor
 
-ENV PORT 8080
-ENV ENVIRONMENT "stage"
-ENV PROJECT_ID "project-${ENVIRONMENT}"
+ENV PROJECT_ID "project"
+ENV REGION ""
 ENV TOPIC_PREFIX "trigger_"
+ENV PORT 8080
+
+EXPOSE ${PORT}
 
 ENTRYPOINT ["./runner"]

@@ -1,0 +1,16 @@
+github.com/serverlessml/ingress/bus/gcp.go:37:			Connect			100.0%
+github.com/serverlessml/ingress/bus/gcp.go:45:			Push			100.0%
+github.com/serverlessml/ingress/handlers/bus.go:26:		PushRoutine		100.0%
+github.com/serverlessml/ingress/handlers/error.go:34:		Error			100.0%
+github.com/serverlessml/ingress/handlers/error.go:51:		Error			100.0%
+github.com/serverlessml/ingress/handlers/error.go:59:		ErrorArray		100.0%
+github.com/serverlessml/ingress/handlers/http.go:28:		MustMarshal		100.0%
+github.com/serverlessml/ingress/handlers/http.go:34:		GetRequestPayload	100.0%
+github.com/serverlessml/ingress/handlers/http.go:41:		HandlerError		100.0%
+github.com/serverlessml/ingress/handlers/http.go:52:		HandlerStatus		100.0%
+github.com/serverlessml/ingress/handlers/http.go:63:		HandlerPOST		100.0%
+github.com/serverlessml/ingress/handlers/processor.go:39:	Exec			100.0%
+github.com/serverlessml/ingress/handlers/processor.go:55:	distubuteData		100.0%
+github.com/serverlessml/ingress/handlers/processor.go:81:	formatOutput		100.0%
+github.com/serverlessml/ingress/handlers/validator.go:24:	Validate		100.0%
+total:								(statements)		100.0%
