@@ -1,6 +1,6 @@
 github.com/serverlessml/gcp-ingress/bus/gcp.go:37:		Connect			100.0%
 github.com/serverlessml/gcp-ingress/bus/gcp.go:45:		Push			100.0%
-github.com/serverlessml/gcp-ingress/handlers/bus.go:58:		PushRoutine		100.0%
+github.com/serverlessml/gcp-ingress/handlers/bus.go:26:		PushRoutine		100.0%
 github.com/serverlessml/gcp-ingress/handlers/error.go:34:	Error			100.0%
 github.com/serverlessml/gcp-ingress/handlers/error.go:51:	Error			100.0%
 github.com/serverlessml/gcp-ingress/handlers/error.go:59:	ErrorArray		100.0%
