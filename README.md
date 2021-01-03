@@ -1,4 +1,4 @@
-# Pipeline Ingress: GCP
+# Pipeline Ingress
 
 ||
 |-|
@@ -19,16 +19,18 @@ The ingress service to invoke ML pipeline. A web-server with two end-points:
 ## Modus Operandi
 
 1. Validate input payload:
-2. Push the payload to a GCP PubSub topic
+2. Push the payload to a message bus' topic
 3. Return 202 as response in case of success
 
 ## How to run
-!Note! It requires an existing GCP account with activated pubsub API, service account (SA) with PubSub Write permissions and a pubsub topic. Once SA is created, generate and download the access key to `${PATH_TO_SERVICE_ACCOUNT_KEY}/key-pubsub.json`.
+!Note! It requires an existing GCP, or AWS account with activated pubsub/SNS API, service account (SA) with PubSub/SNS Write permissions and a PubSub/SNS topic.
+
+Once SA is created, generate and download the access key to `${PATH_TO_SERVICE_ACCOUNT_KEY}/key-pubsub.json`.
 
 Execute:
 
 ```bash
-make build
+make build PLATFORM=gcp
 ```
 
 afterwards:
